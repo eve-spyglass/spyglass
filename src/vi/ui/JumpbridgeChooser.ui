@@ -25,24 +25,28 @@
            <string>Path to the Data</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="1" column="0">
-            <widget class="QLabel" name="label2">
-             <property name="text">
-              <string>For example: http://example.org/jumpbridge_data.txt</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0">
             <layout class="QVBoxLayout" name="verticalLayout_2">
              <item>
               <widget class="QLabel" name="label">
                <property name="text">
-                <string>Please enter the URL to the Jumpbridge data:</string>
+                <string>Please select the jumpbridge data file</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="urlField"/>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QLineEdit" name="urlField"/>
+               </item>
+               <item>
+                <widget class="QPushButton" name="fileChooser">
+                 <property name="text">
+                  <string>Choose File</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
             </layout>
            </item>

@@ -599,11 +599,19 @@ class MainWindow(QtGui.QMainWindow):
         try:
             data = []
             if url != "":
-                resp = requests.get(url)
-                for line in resp.iter_lines(decode_unicode=True):
+                content = None
+                with open(url, 'r') as f:
+                    content = f.readlines()
+
+                for line in content:
                     parts = line.strip().split()
                     if len(parts) == 3:
                         data.append(parts)
+                #resp = requests.get(url)
+                #for line in resp.iter_lines(decode_unicode=True):
+                #   parts = line.strip().split()
+                #    if len(parts) == 3:
+                #        data.append(parts)
             else:
                 data = amazon_s3.getJumpbridgeData(self.dotlan.region.lower())
             self.dotlan.setJumpbridges(data)
@@ -1008,6 +1016,7 @@ class JumpbridgeChooser(QtGui.QDialog):
         uic.loadUi(resourcePath("vi/ui/JumpbridgeChooser.ui"), self)
         self.connect(self.saveButton, SIGNAL("clicked()"), self.savePath)
         self.connect(self.cancelButton, SIGNAL("clicked()"), self.accept)
+        self.connect(self.fileChooser, SIGNAL("clicked()"), self.choosePath)
         self.urlField.setText(url)
         # loading format explanation from textfile
         with open(resourcePath("docs/jumpbridgeformat.txt")) as f:
@@ -1015,11 +1024,14 @@ class JumpbridgeChooser(QtGui.QDialog):
 
 
     def savePath(self):
+
         try:
             url = six.text_type(self.urlField.text())
-            if url != "":
-                requests.get(url).text
             self.emit(SIGNAL("set_jumpbridge_url"), url)
             self.accept()
         except Exception as e:
             QMessageBox.critical(None, "Finding Jumpbridgedata failed", "Error: {0}".format(six.text_type(e)), "OK")
+
+    def choosePath(self):
+        path = QFileDialog.getOpenFileName(self, caption="Open JB Text File")
+        self.urlField.setText(str(path))
