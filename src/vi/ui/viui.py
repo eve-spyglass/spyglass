@@ -599,19 +599,21 @@ class MainWindow(QtGui.QMainWindow):
         try:
             data = []
             if url != "":
-                content = None
-                with open(url, 'r') as f:
-                    content = f.readlines()
+                if url.startswith("http://") or url.startswith("https://"):
+                    resp = requests.get(url)
+                    for line in resp.iter_lines(decode_unicode=True):
+                        parts = line.strip().split()
+                        if len(parts) == 3:
+                           data.append(parts)
+                else:
+                    content = None
+                    with open(url, 'r') as f:
+                        content = f.readlines()
 
-                for line in content:
-                    parts = line.strip().split()
-                    if len(parts) == 3:
-                        data.append(parts)
-                #resp = requests.get(url)
-                #for line in resp.iter_lines(decode_unicode=True):
-                #   parts = line.strip().split()
-                #    if len(parts) == 3:
-                #        data.append(parts)
+                    for line in content:
+                        parts = line.strip().split()
+                        if len(parts) == 3:
+                            data.append(parts)
             else:
                 data = amazon_s3.getJumpbridgeData(self.dotlan.region.lower())
             self.dotlan.setJumpbridges(data)
