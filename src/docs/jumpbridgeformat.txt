@@ -1,10 +1,13 @@
+The jumpbridge file can be accessed either from the internet by specifying  URL;
+or by pointing to a local file.
+
 How to format the data for the jumpbridges:
 
-Put all the jumpbridges in one single textfile, wher a line in the file
+Put all the jumpbridges in one single textfile, where a line in the file
 represents a jumpbridge.
 
 The line contains the first system, the connection between the systems and
-the second system. Between the three parts hast to be a space.
+the second system. Between the three parts there has to be a space.
 
 The connection is a line (minus) in the middle and possible arrows (sign for
 greater or lower) at the ends. If there is such a sign, an arrow will be
