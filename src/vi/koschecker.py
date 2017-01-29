@@ -112,7 +112,12 @@ def check(parts):
             if not nameData["need_check"]:
                 data[charname] = {"kos": UNKNOWN}
             if nameData["need_check"] and corpsResult[nameData["corp_to_check"]] == True:
-                data[charname] = {"kos": RED_BY_LAST}
+
+                #This conditional is to catch the odd cases where the KOS Checker returns nothing for a player, yet their corp is kos
+                if evegate.getCurrentCorpForCharId(namesAsIds[charname]) == nameData["corp_to_check"]:
+                    data[charname]={"kos": KOS}
+                else:
+                    data[charname] = {"kos": RED_BY_LAST}
             else:
                 data[charname] = {"kos": UNKNOWN}
 
