@@ -27,7 +27,7 @@ from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 
 from PyQt4 import QtGui
-from vi import version
+from vi import version, PanningWebView
 from vi.ui import viui, systemtray
 from vi.cache import cache
 from vi.resources import resourcePath
