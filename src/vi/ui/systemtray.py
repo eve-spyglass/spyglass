@@ -84,7 +84,7 @@ class TrayIcon(QtGui.QSystemTrayIcon):
     def __init__(self, app):
         self.icon = QIcon(resourcePath("vi/ui/res/logo_small.png"))
         QSystemTrayIcon.__init__(self, self.icon, app)
-        self.setToolTip("Your Vintel-Information-Service! :)")
+        self.setToolTip("Your Provi I Information Service! :)")
         self.lastNotifications = {}
         self.setContextMenu(TrayContextMenu(self))
         self.showAlarm = True

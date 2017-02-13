@@ -61,7 +61,7 @@ class MainWindow(QtGui.QMainWindow):
         if backGroundColor:
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
         uic.loadUi(resourcePath('vi/ui/MainWindow.ui'), self)
-        self.setWindowTitle("Vintel " + vi.version.VERSION + "{dev}".format(dev="-SNAPSHOT" if vi.version.SNAPSHOT else ""))
+        self.setWindowTitle("Provi I " + vi.version.VERSION + "{dev}".format(dev="-SNAPSHOT" if vi.version.SNAPSHOT else ""))
         self.taskbarIconQuiescent = QtGui.QIcon(resourcePath("vi/ui/res/logo_small.png"))
         self.taskbarIconWorking = QtGui.QIcon(resourcePath("vi/ui/res/logo_small_green.png"))
         self.setWindowIcon(self.taskbarIconQuiescent)
@@ -90,7 +90,7 @@ class MainWindow(QtGui.QMainWindow):
             self.knownPlayerNames = set(self.knownPlayerNames.split(","))
         else:
             self.knownPlayerNames = set()
-            diagText = "Vintel scans EVE system logs and remembers your characters as they change systems.\n\nSome features (clipboard KOS checking, alarms, etc.) may not work until your character(s) have been registered. Change systems, with each character you want to monitor, while Vintel is running to remedy this."
+            diagText = "Provi I scans EVE system logs and remembers your characters as they change systems.\n\nSome features (clipboard KOS checking, alarms, etc.) may not work until your character(s) have been registered. Change systems, with each character you want to monitor, while Provi I is running to remedy this."
             QMessageBox.warning(None, "Known Characters not Found", diagText, "Ok")
 
         # Set up user's intel rooms
@@ -364,7 +364,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def notifyNewerVersion(self, newestVersion):
-        self.trayIcon.showMessage("Newer Version", ("An update is available for Vintel.\nhttps://github.com/Xanthos-Eve/vintel"), 1)
+        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n url goes here"), 1)
 
     def changeChatVisibility(self, newValue=None):
         if newValue is None:
@@ -700,7 +700,7 @@ class MainWindow(QtGui.QMainWindow):
                         text = "None KOS"
                     self.trayIcon.showMessage("Your KOS-Check", text, 1)
                 text = text.replace("\n\n", "<br>")
-                message = chatparser.chatparser.Message("Vintel KOS-Check", text, evegate.currentEveTime(), "VINTEL",
+                message = chatparser.chatparser.Message("Provi I KOS-Check", text, evegate.currentEveTime(), "Provi I",
                                                         [], states.NOT_CHANGE, text.upper(), text)
                 self.addMessageToIntelChat(message)
             elif state == "error":

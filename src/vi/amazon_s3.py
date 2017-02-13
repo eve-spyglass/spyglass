@@ -38,7 +38,7 @@ def getJumpbridgeData(region):
             data = json.loads(data)
         else:
             data = []
-            url = "https://s3.amazonaws.com/vintel-resources/{region}_jb.txt"
+            url = "https://s3-ap-southeast-2.amazonaws.com/provii-resource/{region}_jb.txt"
             resp = requests.get(url.format(region=region))
             for line in resp.iter_lines(decode_unicode=True):
                 splits = line.strip().split()
@@ -53,7 +53,7 @@ def getJumpbridgeData(region):
 
 def getNewestVersion():
     try:
-        url = "https://s3.amazonaws.com/vintel-resources/current-version.txt"
+        url = "https://s3-ap-southeast-2.amazonaws.com/provii-resource/current_version.txt"
         newestVersion = requests.get(url).text
         return newestVersion
     except Exception as e:

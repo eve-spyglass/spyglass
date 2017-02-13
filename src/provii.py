@@ -81,12 +81,12 @@ class Application(QApplication):
             sys.exit(1)
 
         # Setting local directory for cache and logging
-        vintelDirectory = os.path.join(os.path.dirname(os.path.dirname(chatLogDirectory)), "vintel")
-        if not os.path.exists(vintelDirectory):
-            os.mkdir(vintelDirectory)
-        cache.Cache.PATH_TO_CACHE = os.path.join(vintelDirectory, "cache-2.sqlite3")
+        proviiDirectory = os.path.join(os.path.dirname(os.path.dirname(chatLogDirectory)), "provii")
+        if not os.path.exists(proviiDirectory):
+            os.mkdir(proviiDirectory)
+        cache.Cache.PATH_TO_CACHE = os.path.join(proviiDirectory, "cache-2.sqlite3")
 
-        vintelLogDirectory = os.path.join(vintelDirectory, "logs")
+        vintelLogDirectory = os.path.join(proviiDirectory, "logs")
         if not os.path.exists(vintelLogDirectory):
             os.mkdir(vintelLogDirectory)
 
@@ -118,7 +118,7 @@ class Application(QApplication):
         rootLogger.addHandler(consoleHandler)
 
         logging.critical("")
-        logging.critical("------------------- Vintel %s starting up -------------------", version.VERSION)
+        logging.critical("------------------- Provi I %s starting up -------------------", version.VERSION)
         logging.critical("")
         logging.debug("Looking for chat logs at: %s", chatLogDirectory)
         logging.debug("Cache maintained here: %s", cache.Cache.PATH_TO_CACHE)

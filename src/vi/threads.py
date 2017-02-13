@@ -63,7 +63,7 @@ class AvatarFindThread(QThread):
                 charname = chatEntry.message.user
                 logging.debug("AvatarFindThread getting avatar for %s" % charname)
                 avatar = None
-                if charname == "VINTEL":
+                if charname == "PROVI I":
                     with open(resourcePath("vi/ui/res/logo_small.png"), "rb") as f:
                         avatar = f.read()
                 if not avatar:

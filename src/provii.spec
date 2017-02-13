@@ -1,11 +1,11 @@
 # -*- mode: python -*-
 import sys
 
-app_name = 'vintel'
+app_name = 'provii'
 block_cipher = None
 
-a = Analysis(['vintel.py'],
-             pathex=['z:\\mark\\code\\vintel\\src' if sys.platform == 'win32' else '/Users/mark/code/vintel/src'],
+a = Analysis(['provii.py'],
+             pathex=['c:\\projects\\provii\\src' if sys.platform == 'win32' else '/home/michael/provi-i/src'],
              binaries=None,
              datas=None,
              hiddenimports=[],
