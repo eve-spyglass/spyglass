@@ -1,20 +1,21 @@
 
 <p align="center">
-  <img align="middle" src="src/vi/ui/res/logo.png">
+  <img align="middle" src="http://www.crypta.tech/wp-content/uploads/2017/02/logo.png">
 </p>
 # Welcome To Provi I: The Eye of Providence
 
-Provi I: The Eye of Providence is an intel visualisation and alarm system for [EVE Online](http://www.eveonline.com). This too gathers information from in game chat channels and presents the data on a [dotlan](http://evemaps.dotlan.net/map/Catch#npc24) generated map. The map is hihgleted in real time as players report intel in monitored chat channels.
+Provi I: The Eye of Providence is an intel visualisation and alarm system for [EVE Online](http://www.eveonline.com). This too gathers information from in game chat channels and presents the data on a [dotlan](http://evemaps.dotlan.net/map/Catch#npc24) generated map. The map is highlighted in real time as players report intel in monitored chat channels.
 
 Provi I is written with Python 2.7, using PyQt4 for the graphical interface, BeautifulSoup4 for SVG parsing, and Pyglet for audio playback.
 
 ### News
-_The current release version of Provi I [can be found here](http://www.crypta.tech).
+-The current release version of Provi I [can be found here](http://www.crypta.tech/provi-i-the-eye-of-providence).
 
+-[grd_list user="Crypta-Eve" repo="provi-i"]
 
 ## Screenshot
 
-![](https://github.com/Crypta-Eve/provi-i/blob/master/src/docs/screenshot.png)
+![](http://www.crypta.tech/wp-content/uploads/2017/02/VI_px.png)
 
 ## Features
 
@@ -25,9 +26,9 @@ _The current release version of Provi I [can be found here](http://www.crypta.te
  - An interactive map of Providence / Catch is provided. Systems on the map display real-time intel data as reported through intel channels.
  - Systems on the map display different color backgrounds as their alarms age, with text indicating how long ago the specific system was reported. Background color becomes red when a system is reported and lightens (red->orange->yellow->white) in the following intervals: 4min, 10min, 15min, and 25min.
  - Systems reported clear display on the map with a green background for 10 minutes.
- - Clicking on a specific system will display all messages bound on that system in the past 20 minutes. From there one can can set a system alarm, set the sytems clear or set it as the current system for one or more of your characters.
+ - Clicking on a specific system will display all messages bound on that system in the past 20 minutes. From there one can can set a system alarm, set the systems clear or set it as the current system for one or more of your characters.
  - Clicking on a system in the intel channel (right hand column) causes it to be highlighted on the map with a blue background for 10 seconds.
- - The system where your character is currently located is highlighted on the map with an violet background automatically whenever a characater changes systems.
+ - The system where your character is currently located is highlighted on the map with an violet background automatically whenever a character changes systems.
  - Alarms can be set so that task-bar notifications are displayed when an intel report calls out a system within a specified number of jumps from your character(s). This can be configured from the task-bar icon.
  - The main window can be set up to remain "always on top" and be displayed with a specified level of transparency.
  - Ship names in the intel chat are marked blue.
@@ -53,7 +54,7 @@ To use this feature: click on a pilot in the local pilot list and then type the 
 
 ## Running Provi I from Source
 
-To run or build from the source you need the following packages installed on your machine. Most, if not all, can be installed from the command line using package management software such as "pip". Mac and Linux both come with pip installed, Windows users may need to install [cygwin](https://www.cygwin.com) to get pip. Of course all the requirements also have downoad links.
+To run or build from the source you need the following packages installed on your machine. Most, if not all, can be installed from the command line using package management software such as "pip". Mac and Linux both come with pip installed, Windows users may need to install [cygwin](https://www.cygwin.com) to get pip. Of course all the requirements also have download links.
 
 The packages required are:
 - Python 2.7.x
@@ -115,7 +116,7 @@ Examples:
 
     – or –
 
-`linux and mac> python vintel.py "/home/user/myverypecialpath/EVE/logs/chatlogs"`
+`linux and mac> python provii.py "/home/user/myverypecialpath/EVE/logs/chatlogs"`
 
 **Provi I does not start! What can I do?**
 
@@ -139,7 +140,7 @@ Do not use the standalone EXE, install the environment and use the sourcecode di
 
 **Provi I is misbehaving and I dont know why - how can I easily help diagnose problems with Provi I**
 
-Provi I writes its own set of logs to the \Documents\EVE\provii\provii directory. A new log is created as the old one fills up to its maximum size setting. Each entry inside the log file is time-stamped. These logs are emitted in real-time so you can watch the changes to the file as you use the app.
+Provi I writes its own set of logs to the \Documents\EVE\provii\logs directory. A new log is created as the old one fills up to its maximum size setting. Each entry inside the log file is time-stamped. These logs are emitted in real-time so you can watch the changes to the file as you use the app.
 
 **I love Provi I - how can I help?**
 
