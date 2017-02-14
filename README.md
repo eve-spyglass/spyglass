@@ -9,9 +9,8 @@ Provi I: The Eye of Providence is an intel visualisation and alarm system for [E
 Provi I is written with Python 2.7, using PyQt4 for the graphical interface, BeautifulSoup4 for SVG parsing, and Pyglet for audio playback.
 
 ### News
--The current release version of Provi I [can be found here](http://www.crypta.tech/provi-i-the-eye-of-providence).
+-The current release version of Provi I [can be found here](http://www.crypta.tech/provi-i-the-eye-of-providence) at the bottom of the page or on the [GitHub releases page](https://github.com/Crypta-Eve/provi-i/releases).
 
--[grd_list user="Crypta-Eve" repo="provi-i"]
 
 ## Screenshot
 
