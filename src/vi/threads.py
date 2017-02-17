@@ -210,23 +210,14 @@ class VoiceOverThread(threading.Thread):
 
     def run(self):
         while True:
+            #Will block until it gets a something
             words = self.queue.get()
-            start = datetime.datetime.utcnow()
+            #Init every time, only takes ~20us on slow machines and avoids colliding words
             self.engine = pyttsx.init()
-            init = datetime.datetime.utcnow()
             self.engine.setProperty('rate', 160)
             self.engine.setProperty('voice', 'english-us')
             self.engine.say(words)
-            reponse = self.engine.runAndWait()
+            #should block until the end of the words
             self.queue.task_done()
             self.engine = None
-            done = datetime.datetime.utcnow()
-
-            init = init - start
-            total = done - start
-
-            print ("init: " + str(init.microseconds) + " total: " + str(total.microseconds))
-            start = None
-            init = None
-            done = None
 
