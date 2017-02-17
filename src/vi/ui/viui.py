@@ -38,7 +38,7 @@ from vi import states
 from vi.cache.cache import Cache
 from vi.resources import resourcePath
 from vi.soundmanager import SoundManager
-from vi.threads import AvatarFindThread, KOSCheckerThread, MapStatisticsThread
+from vi.threads import AvatarFindThread, KOSCheckerThread, MapStatisticsThread, VoiceOverThread
 from vi.ui.systemtray import TrayContextMenu
 from vi.chatparser import ChatParser
 from PyQt4.QtGui import QAction
@@ -210,6 +210,10 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.statisticsThread, SIGNAL("statistic_data_update"), self.updateStatisticsOnMap)
         self.statisticsThread.start()
         # statisticsThread is blocked until first call of requestStatistics
+
+        self.voiceThread = VoiceOverThread()
+        self.voiceThread.start()
+
 
 
     def setupMap(self, initialize=False):
@@ -824,7 +828,7 @@ class ChatroomsChooser(QtGui.QDialog):
         cache = Cache()
         roomnames = cache.getFromCache("room_names")
         if not roomnames:
-            roomnames = u"TheCitadel,North Provi Intel,North Catch Intel,North Querious Intel"
+            roomnames = u"TheCitadel,North Provi Intel,4THINTEL"
         self.roomnamesField.setPlainText(roomnames)
 
 
@@ -836,7 +840,7 @@ class ChatroomsChooser(QtGui.QDialog):
 
 
     def setDefaults(self):
-        self.roomnamesField.setPlainText(u"TheCitadel,North Provi Intel,North Catch Intel,North Querious Intel")
+        self.roomnamesField.setPlainText(u"TheCitadel,North Provi Intel,4THINTEL")
 
 
 class RegionChooser(QtGui.QDialog):

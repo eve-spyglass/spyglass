@@ -90,7 +90,7 @@ class Application(QApplication):
         if not os.path.exists(vintelLogDirectory):
             os.mkdir(vintelLogDirectory)
 
-        splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo.png")))
+        splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
 
         vintelCache = Cache()
         logLevel = vintelCache.getFromCache("logging_level")

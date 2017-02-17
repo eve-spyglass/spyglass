@@ -18,9 +18,13 @@
 ###########################################################################
 
 import time
+import datetime
 import logging
 import six
+import pyttsx
+import threading
 
+from Queue import Queue
 from six.moves import queue
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
 from vi import evegate
@@ -191,3 +195,38 @@ class MapStatisticsThread(QThread):
         self.active = False
         self.queue.put(None)
         QThread.quit(self)
+
+class VoiceOverThread(threading.Thread):
+    def __init__(self):
+        super(VoiceOverThread, self).__init__()
+        self.engine = pyttsx.init()
+        self.engine.setProperty('rate', 185)
+        self.engine.setProperty('voice', 'english-us')
+        self.queue = Queue()
+        self.daemon = True
+
+    def add_message(self, msg):
+        self.queue.put(msg)
+
+    def run(self):
+        while True:
+            words = self.queue.get()
+            start = datetime.datetime.utcnow()
+            self.engine = pyttsx.init()
+            init = datetime.datetime.utcnow()
+            self.engine.setProperty('rate', 160)
+            self.engine.setProperty('voice', 'english-us')
+            self.engine.say(words)
+            reponse = self.engine.runAndWait()
+            self.queue.task_done()
+            self.engine = None
+            done = datetime.datetime.utcnow()
+
+            init = init - start
+            total = done - start
+
+            print ("init: " + str(init.microseconds) + " total: " + str(total.microseconds))
+            start = None
+            init = None
+            done = None
+
