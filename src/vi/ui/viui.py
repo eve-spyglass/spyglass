@@ -98,7 +98,7 @@ class MainWindow(QtGui.QMainWindow):
         if roomnames:
             roomnames = roomnames.split(",")
         else:
-            roomnames = (u"TheCitadel", u"North Provi Intel", u"North Catch Intel", "North Querious Intel")
+            roomnames = (u"TheCitadel", u"North Provi Intel", u"4THINTEL")
             self.cache.putIntoCache("room_names", u",".join(roomnames), 60 * 60 * 24 * 365 * 5)
         self.roomnames = roomnames
 
@@ -364,7 +364,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def notifyNewerVersion(self, newestVersion):
-        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n url goes here"), 1)
+        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n www.crypta.tech"), 1)
 
     def changeChatVisibility(self, newValue=None):
         if newValue is None:
