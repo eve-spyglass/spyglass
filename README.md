@@ -2,6 +2,19 @@
 <p align="center">
   <img align="middle" src="http://www.crypta.tech/wp-content/uploads/2017/02/logo.png">
 </p>
+
+<p>
+
+<p align="center">
+"Casting his sight on his realm, the Lord witnessed<br>
+The cascade of evil, the torrents of war.<br>
+Burning with wrath, He stepped<br>
+down from the Heavens<br>
+To judge the unworthy,<br>
+To redeem the pure."<br>
+<b>- The Scriptures, Book II, Revelations 2:12</b> <br>
+</p>
+
 # Welcome To Provi I: The Eye of Providence
 
 Provi I: The Eye of Providence is an intel visualisation and alarm system for [EVE Online](http://www.eveonline.com). This too gathers information from in game chat channels and presents the data on a [dotlan](http://evemaps.dotlan.net/map/Catch#npc24) generated map. The map is highlighted in real time as players report intel in monitored chat channels.
