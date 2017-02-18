@@ -361,6 +361,7 @@ class MainWindow(QtGui.QMainWindow):
             self.versionCheckThread.wait()
             self.statisticsThread.quit()
             self.statisticsThread.wait()
+            self.voiceThread.join()
         except Exception:
             pass
         self.trayIcon.hide()

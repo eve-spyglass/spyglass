@@ -204,20 +204,25 @@ class VoiceOverThread(threading.Thread):
         self.engine.setProperty('voice', 'english-us')
         self.queue = Queue()
         self.daemon = True
+        self.stoprequest = threading.Event()
 
     def add_message(self, msg):
         self.queue.put(msg)
 
     def run(self):
-        while True:
-            #Will block until it gets a something
-            words = self.queue.get()
-            #Init every time, only takes ~20us on slow machines and avoids colliding words
-            self.engine = pyttsx.init()
-            self.engine.setProperty('rate', 160)
-            self.engine.setProperty('voice', 'english-us')
-            self.engine.say(words)
-            #should block until the end of the words
-            self.queue.task_done()
-            self.engine = None
+        while not self.stoprequest.is_set:
+            try:
+                #Will block until it gets a something or times out
+                words = self.queue.get(True, 1)
+                #Init every time, only takes ~20us on slow machines and avoids colliding words
+                self.engine = pyttsx.init()
+                self.engine.setProperty('rate', 160)
+                self.engine.setProperty('voice', 'english-us')
+                self.engine.say(words)
+                #should block until the end of the words
+                self.queue.task_done()
+                self.engine = None
+            except Queue.Empty:
+                continue
+
 
