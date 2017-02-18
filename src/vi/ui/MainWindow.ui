@@ -341,7 +341,7 @@
      <x>0</x>
      <y>0</y>
      <width>936</width>
-     <height>22</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -395,9 +395,16 @@
       <string>Transparency</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuTheme">
+     <property name="title">
+      <string>Theme</string>
+     </property>
+    </widget>
     <addaction name="alwaysOnTopAction"/>
     <addaction name="framelessWindowAction"/>
     <addaction name="menuTransparency"/>
+    <addaction name="separator"/>
+    <addaction name="menuTheme"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menuChat"/>
@@ -637,6 +644,16 @@
    </property>
    <property name="regionName" stdset="0">
     <string>querious</string>
+   </property>
+  </action>
+  <action name="actionDefault">
+   <property name="text">
+    <string>default</string>
+   </property>
+  </action>
+  <action name="actionDarkstyle">
+   <property name="text">
+    <string>darkstyle</string>
    </property>
   </action>
  </widget>

@@ -40,6 +40,7 @@ from vi.resources import resourcePath
 from vi.soundmanager import SoundManager
 from vi.threads import AvatarFindThread, KOSCheckerThread, MapStatisticsThread, VoiceOverThread
 from vi.ui.systemtray import TrayContextMenu
+from vi.ui.styles import Styles
 from vi.chatparser import ChatParser
 from PyQt4.QtGui import QAction
 from PyQt4.QtGui import QMessageBox
@@ -119,6 +120,19 @@ class MainWindow(QtGui.QMainWindow):
             self.opacityGroup.addAction(action)
             self.menuTransparency.addAction(action)
 
+        # Set up Theme menu - fill in list of themes and add connections
+        self.themeGroup = QActionGroup(self.menu)
+        styles = Styles()
+        for theme in styles.getStyles():
+            action = QAction(theme, None, checkable=True)
+            action.theme = theme
+            if action.theme == "default":
+                action.setChecked(True)
+            logging.info("Adding theme %")
+            self.connect(action, SIGNAL("triggered()"), self.changeTheme)
+            self.themeGroup.addAction(action)
+            self.menuTheme.addAction(action)
+        styles = None
         #
         # Platform specific UI resizing - we size items in the resource files to look correct on the mac,
         # then resize other platforms as needed
@@ -135,7 +149,6 @@ class MainWindow(QtGui.QMainWindow):
         self.recallCachedSettings()
         self.setupThreads()
         self.setupMap(True)
-
 
     def paintEvent(self, event):
         opt = QStyleOption()
@@ -409,6 +422,16 @@ class MainWindow(QtGui.QMainWindow):
                     action.setChecked(True)
         action = self.opacityGroup.checkedAction()
         self.setWindowOpacity(action.opacity)
+
+    def changeTheme(self, newTheme=None):
+        if newTheme is not None:
+            for action in self.themeGroup.actions():
+                if action.theme == newTheme:
+                    action.setChecked(True)
+        action = self.themeGroup.checkedAction()
+        styles = Styles()
+        theme = styles.getStyle(action.theme)
+        self.setStyleSheet(theme)
 
     def changeSound(self, newValue=None, disable=False):
         if disable:
