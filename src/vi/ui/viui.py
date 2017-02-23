@@ -430,8 +430,10 @@ class MainWindow(QtGui.QMainWindow):
                     action.setChecked(True)
         action = self.themeGroup.checkedAction()
         styles = Styles()
-        theme = styles.getStyle(action.theme)
+        styles.setStyle(action.theme)
+        theme = styles.getStyle()
         self.setStyleSheet(theme)
+        self.setupMap(initialize=True)
 
     def changeSound(self, newValue=None, disable=False):
         if disable:

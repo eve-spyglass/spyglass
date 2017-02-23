@@ -30,6 +30,7 @@ import logging
 from bs4 import BeautifulSoup
 from vi import states
 from vi.cache.cache import Cache
+from vi.ui.styles import Styles, TextInverter
 
 from . import evegate
 
@@ -49,6 +50,7 @@ class Map(object):
     """
 
     DOTLAN_BASIC_URL = u"http://evemaps.dotlan.net/svg/{0}.svg"
+    styles = Styles()
 
     @property
     def svg(self):
@@ -132,10 +134,12 @@ class Map(object):
 
     def _prepareSvg(self, soup, systems):
         svg = soup.select("svg")[0]
-        # Disable dotlan mouse functionality and make all jump lines black
+        # Disable dotlan mouse functionality
         svg["onmousedown"] = "return false;"
-        for line in soup.select("line"):
-            line["class"] = "j"
+        svg["style"] = "background: {}".format(self.styles.getCommons()["bg_colour"])
+        if self.styles.getCommons()["change_lines"]:
+            for line in soup.select("line"):
+                line["class"] = "j"
 
         # Current system marker ellipse
         group = soup.new_tag("g", id="select_marker", opacity="0", activated="0", transform="translate(0, 0)")
@@ -273,7 +277,7 @@ class Map(object):
     def debugWriteSoup(self):
         svgData = self.soup.prettify("utf-8")
         try:
-            with open("/Users/mark/Desktop/output.svg", "wb") as svgFile:
+            with open("/home/michael/Desktop/output.svg", "wb") as svgFile:
                 svgFile.write(svgData)
                 svgFile.close()
         except Exception as e:
@@ -285,11 +289,14 @@ class System(object):
         A System on the Map
     """
 
-    ALARM_COLORS = [(60 * 4, "#FF0000", "#FFFFFF"), (60 * 10, "#FF9B0F", "#FFFFFF"), (60 * 15, "#FFFA0F", "#000000"),
-                    (60 * 25, "#FFFDA2", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
+    styles = Styles()
+    textInv = TextInverter()
+
+    ALARM_COLORS = [(60 * 4, "#FF0000", "#FFFFFF"), (60 * 10, "#FF9B0F", "#FFFFFF"), (60 * 15, "#FFFA0F", "#000000"), (60 * 25, "#FFFDA2", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
+    CLEAR_COLORS = [(60 * 4, "#00FF00", "#000000"), (60 * 10, "#80FF80", "#000000"), (60 * 15, "#80FF80", "#000000"), (60 * 25, "#C0FFC0", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
     ALARM_COLOR = ALARM_COLORS[0][1]
-    UNKNOWN_COLOR = "#FFFFFF"
-    CLEAR_COLOR = "#59FF6C"
+    UNKNOWN_COLOR = styles.getCommons()["unknown_colour"]
+    CLEAR_COLOR = CLEAR_COLORS[0][1]
 
     def __init__(self, name, svgElement, mapSoup, mapCoordinates, transform, systemId):
         self.status = states.UNKNOWN
@@ -298,18 +305,20 @@ class System(object):
         self.mapSoup = mapSoup
         self.origSvgElement = svgElement
         self.rect = svgElement.select("rect")[0]
+        self.firstLine = svgElement.select("text")[0]
         self.secondLine = svgElement.select("text")[1]
         self.lastAlarmTime = 0
         self.messages = []
         self.setStatus(states.UNKNOWN)
         self.__locatedCharacters = []
-        self.backgroundColor = "#FFFFFF"
+        self.backgroundColor = self.styles.getCommons()["bg_colour"]
         self.mapCoordinates = mapCoordinates
         self.systemId = systemId
         self.transform = transform
         self.cachedOffsetPoint = None
         self._neighbours = set()
         self.statistics = {"jumps": "?", "shipkills": "?", "factionkills": "?", "podkills": "?"}
+        self.currentStyle = ""
 
     def getTransformOffsetPoint(self):
         if not self.cachedOffsetPoint:
@@ -423,9 +432,10 @@ class System(object):
             self.lastAlarmTime = time.time()
             if "stopwatch" not in self.secondLine["class"]:
                 self.secondLine["class"].append("stopwatch")
-            self.secondLine["alarmtime"] = self.lastAlarmTime
-            self.secondLine["style"] = "fill: #FFFFFF;"
             self.setBackgroundColor(self.ALARM_COLOR)
+            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["alarmtime"] = self.lastAlarmTime
+            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
         elif newStatus == states.CLEAR:
             self.lastAlarmTime = time.time()
             self.setBackgroundColor(self.CLEAR_COLOR)
@@ -433,16 +443,19 @@ class System(object):
             if "stopwatch" not in self.secondLine["class"]:
                 self.secondLine["class"].append("stopwatch")
             self.secondLine["alarmtime"] = self.lastAlarmTime
-            self.secondLine["style"] = "fill: #000000;"
+            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
             self.secondLine.string = "clear"
         elif newStatus == states.WAS_ALARMED:
             self.setBackgroundColor(self.UNKNOWN_COLOR)
+            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
             self.secondLine["style"] = "fill: #000000;"
         elif newStatus == states.UNKNOWN:
             self.setBackgroundColor(self.UNKNOWN_COLOR)
             # second line in the rects is reserved for the clock
             self.secondLine.string = "?"
-            self.secondLine["style"] = "fill: #000000;"
+#            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+#            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
         if newStatus not in (states.NOT_CHANGE, states.REQUEST):  # unknown not affect system status
             self.status = newStatus
 
@@ -456,16 +469,26 @@ class System(object):
 
     def update(self):
         # state changed?
+        #print (self.secondLine)
+        #self.firstLine["style"] = "fill: #FFFFFF" #System name
+        #self.secondLine["style"] = "fill: #FFFFFF" #Timer / ?
+
+        if (self.currentStyle is not self.styles.currentStyle):
+            self.currentStyle = self.styles.currentStyle
+            self.updateStyle()
+
         if (self.status == states.ALARM):
             alarmTime = time.time() - self.lastAlarmTime
-            for maxDiff, alarmColor, secondLineColor in self.ALARM_COLORS:
+            for maxDiff, alarmColour, lineColour in self.ALARM_COLORS:
                 if alarmTime < maxDiff:
-                    if self.backgroundColor != alarmColor:
-                        self.backgroundColor = alarmColor
+                    if self.backgroundColor != alarmColour:
+                        self.backgroundColor = alarmColour
                         for rect in self.svgElement("rect"):
                             if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
                                 rect["style"] = "fill: {0};".format(self.backgroundColor)
-                        self.secondLine["style"] = "fill: {0};".format(secondLineColor)
+                        lineColour = self.textInv.getTextColourFromBackground(alarmColour)
+                        self.firstLine["style"] = "fill: {}".format(lineColour)
+                        self.secondLine["style"] = "fill: {};".format(lineColour)
                     break
         if self.status in (states.ALARM, states.WAS_ALARMED, states.CLEAR):  # timer
             diff = math.floor(time.time() - self.lastAlarmTime)
@@ -473,14 +496,38 @@ class System(object):
             seconds = int(diff - minutes * 60)
             string = "{m:02d}:{s:02d}".format(m=minutes, s=seconds)
             if self.status == states.CLEAR:
-                secondsUntilWhite = 10 * 60
-                calcValue = int(diff / (secondsUntilWhite / 255.0))
-                if calcValue > 255:
-                    calcValue = 255
-                    self.secondLine["style"] = "fill: #008100;"
+                for maxDiff, clearColour, lineColour in self.CLEAR_COLORS:
+                    if maxDiff < diff:
+                        if self.backgroundColor != clearColour:
+                            self.backgroundColor = clearColour
+                            for rect in self.svgElement("rect"):
+                                if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
+                                    rect["style"] = "fill: {0};".format(self.backgroundColor)
+                            #lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
+                            self.firstLine["style"] = "fill: {}".format(lineColour)
+                            self.secondLine["style"] = "fill: {0};".format(lineColour)
                 string = "clr: {m:02d}:{s:02d}".format(m=minutes, s=seconds)
-                self.setBackgroundColor("rgb({r},{g},{b})".format(r=calcValue, g=255, b=calcValue))
             self.secondLine.string = string
+        #print self.backgroundColor, self.name, self.status
+
+
+
+    def updateLineColour(self):
+        lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
+        self.firstLine["style"] = "fill: {}".format(lineColour)
+        self.secondLine["style"] = "fill: {0};".format(lineColour)
+
+    def updateStyle(self):
+        for i in range(5):
+            self.ALARM_COLORS[i] = (self.ALARM_COLORS[i][0], self.styles.getCommons()["alarm_colours"][i], self.textInv.getTextColourFromBackground(self.ALARM_COLORS[i][1]))
+        self.ALARM_COLOR = self.ALARM_COLORS[0][1]
+        self.UNKNOWN_COLOR = self.styles.getCommons()["unknown_colour"]
+        self.CLEAR_COLOR = self.styles.getCommons()["clear_colour"]
+        self.setBackgroundColor(self.UNKNOWN_COLOR)
+        self.status = states.UNKNOWN
+        lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
+        self.firstLine["style"] = "fill: {}".format(lineColour)
+        self.secondLine["style"] = "fill: {0};".format(lineColour)
 
 
 def convertRegionName(name):

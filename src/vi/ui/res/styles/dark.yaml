@@ -1,0 +1,13 @@
+bg_colour: '#31363B'
+change_lines: False
+line_colour: '#FFFFFF'
+alarm_colours:
+- '#FF0000'
+- '#FF9B0F'
+- '#F2ED0E'
+- '#CFCB19'
+- '#31363B'
+unknown_colour: '#31363B'
+clear_colour: '#50E661'
+text_colour: '#FFFFFF'
+text_inverter: True
