@@ -3,8 +3,6 @@
   <img align="middle" src="http://www.crypta.tech/wp-content/uploads/2017/02/logo-1.png">
 </p>
 
-<p>
-
 <p align="center">
 "Casting his sight on his realm, the Lord witnessed<br>
 The cascade of evil, the torrents of war.<br>
