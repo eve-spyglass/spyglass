@@ -433,7 +433,8 @@ class MainWindow(QtGui.QMainWindow):
         styles.setStyle(action.theme)
         theme = styles.getStyle()
         self.setStyleSheet(theme)
-        self.setupMap(initialize=True)
+        logging.critical("Setting new theme: {}".format(action.theme))
+        self.setupMap()
 
     def changeSound(self, newValue=None, disable=False):
         if disable:
