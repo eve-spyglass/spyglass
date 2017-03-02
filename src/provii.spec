@@ -34,6 +34,10 @@ a.datas += [('vi/ui/MainWindow.ui', 'vi/ui/MainWindow.ui', 'DATA'),
             ('vi/ui/res/178031__zimbot__transporterstartbeep0-sttos-recreated.wav', 'vi/ui/res/178031__zimbot__transporterstartbeep0-sttos-recreated.wav', 'DATA'),
             ('vi/ui/res/178032__zimbot__redalert-klaxon-sttos-recreated.wav', 'vi/ui/res/178032__zimbot__redalert-klaxon-sttos-recreated.wav', 'DATA'),
             ('vi/ui/res/mapdata/Providencecatch.svg', 'vi/ui/res/mapdata/Providencecatch.svg', 'DATA'),
+            ('vi/ui/res/styles/dark.css', 'vi/ui/res/styles/dark.css', 'DATA'),
+            ('vi/ui/res/styles/dark.yaml', 'vi/ui/res/styles/dark.yaml', 'DATA'),
+            ('vi/ui/res/styles/default.css', 'vi/ui/res/styles/default.css', 'DATA'),
+            ('vi/ui/res/styles/default.yaml', 'vi/ui/res/styles/default.yaml', 'DATA'),
             ('docs/jumpbridgeformat.txt', 'docs/jumpbridgeformat.txt', 'DATA'),
             ]
 

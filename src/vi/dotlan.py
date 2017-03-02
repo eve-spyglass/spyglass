@@ -370,6 +370,7 @@ class System(object):
         for rect in self.svgElement("rect"):
             if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
                 rect["style"] = "fill: {0};".format(color)
+        self.backgroundColor = color
 
     def getLocatedCharacters(self):
         characters = []
@@ -503,9 +504,7 @@ class System(object):
                             for rect in self.svgElement("rect"):
                                 if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
                                     rect["style"] = "fill: {0};".format(self.backgroundColor)
-                            #lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
-                            self.firstLine["style"] = "fill: {}".format(lineColour)
-                            self.secondLine["style"] = "fill: {0};".format(lineColour)
+                            self.updateLineColour()
                 string = "clr: {m:02d}:{s:02d}".format(m=minutes, s=seconds)
             self.secondLine.string = string
         #print self.backgroundColor, self.name, self.status

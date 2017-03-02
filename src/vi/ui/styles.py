@@ -70,3 +70,8 @@ class TextInverter():
             return "#000000"
         else:
             return "#FFFFFF"
+
+if __name__ == "__main__":
+    inv = TextInverter()
+    print "50E661"
+    print (inv.getTextColourFromBackground("50E661"))

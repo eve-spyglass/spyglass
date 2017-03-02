@@ -150,6 +150,10 @@ class MainWindow(QtGui.QMainWindow):
         self.setupThreads()
         self.setupMap(True)
 
+        initialTheme = self.cache.getFromCache("theme")
+        if initialTheme:
+            self.changeTheme(initialTheme)
+
     def paintEvent(self, event):
         opt = QStyleOption()
         opt.initFrom(self)
@@ -434,6 +438,7 @@ class MainWindow(QtGui.QMainWindow):
         theme = styles.getStyle()
         self.setStyleSheet(theme)
         logging.critical("Setting new theme: {}".format(action.theme))
+        self.cache.putIntoCache("theme", action.theme, 60 * 60 * 24 * 365)
         self.setupMap()
 
     def changeSound(self, newValue=None, disable=False):
