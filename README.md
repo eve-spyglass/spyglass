@@ -1,9 +1,7 @@
 
 <p align="center">
-  <img align="middle" src="http://www.crypta.tech/wp-content/uploads/2017/02/logo.png">
+  <img align="middle" src="http://www.crypta.tech/wp-content/uploads/2017/02/logo-1.png">
 </p>
-
-<p>
 
 <p align="center">
 "Casting his sight on his realm, the Lord witnessed<br>
@@ -28,6 +26,8 @@ Provi I is written with Python 2.7, using PyQt4 for the graphical interface, Bea
 ## Screenshot
 
 ![](http://www.crypta.tech/wp-content/uploads/2017/02/VI_px.png)
+
+Note this is an old screesnshot soon to be updated!
 
 ## Features
 

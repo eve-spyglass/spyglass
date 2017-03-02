@@ -386,7 +386,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def notifyNewerVersion(self, newestVersion):
-        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n url goes here"), 1)
+        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n www.crypta.tech"), 1)
 
     def changeChatVisibility(self, newValue=None):
         if newValue is None:
