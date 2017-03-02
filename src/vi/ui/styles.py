@@ -1,6 +1,8 @@
 import logging
 import yaml
 
+from vi.resources import resourcePath
+
 class Styles:
 
     defaultStyle = ""
@@ -16,16 +18,16 @@ class Styles:
     def __init__(self):
 
         #default theme
-        with open("vi/ui/res/styles/default.css") as default:
+        with open(resourcePath("vi/ui/res/styles/default.css")) as default:
             Styles.defaultStyle = default.read()
-        with open("vi/ui/res/styles/default.yaml") as default:
+        with open(resourcePath("vi/ui/res/styles/default.yaml")) as default:
             Styles.defaultCommons = yaml.load(default)
         default = None
 
         #dark theme
-        with open("vi/ui/res/styles/dark.css") as dark:
+        with open(resourcePath("vi/ui/res/styles/dark.css")) as dark:
             Styles.darkStyle = dark.read()
-        with open("vi/ui/res/styles/dark.yaml") as dark:
+        with open(resourcePath("vi/ui/res/styles/dark.yaml")) as dark:
             Styles.darkCommons = yaml.load(dark)
         dark = None
 
