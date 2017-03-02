@@ -84,6 +84,7 @@ pyglet is used to play the sound – If it is not available the sound option wil
 - Requests 2
 https://pypi.python.org/pypi/requests
 - Six for python 3 compatibility https://pypi.python.org/pypi/six
+- Pyaml for parsing theme files
 - pyttsx for text to speech
 
 ## The background Provi I
