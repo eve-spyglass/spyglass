@@ -98,7 +98,9 @@ class Map(object):
         self.systemsById = {}
         for system in self.systems.values():
             self.systemsById[system.systemId] = system
-        self._prepareSvg(self.soup, self.systems)
+        scale = 1
+        if self.region == "Providence-catch": scale = 0.9
+        self._prepareSvg(self.soup, self.systems, scale)
         self._connectNeighbours()
         self._jumpMapsVisible = False
         self._statisticsVisible = False
@@ -132,7 +134,7 @@ class Map(object):
                 systems[name] = System(name, element, self.soup, mapCoordinates, transform, systemId)
         return systems
 
-    def _prepareSvg(self, soup, systems):
+    def _prepareSvg(self, soup, systems, scale=1):
         svg = soup.select("svg")[0]
         # Disable dotlan mouse functionality
         svg["onmousedown"] = "return false;"
@@ -140,7 +142,8 @@ class Map(object):
         if self.styles.getCommons()["change_lines"]:
             for line in soup.select("line"):
                 line["class"] = "j"
-
+        #Shrink the svg slightly. This is a fix for the compact map only to prevent clipping, but should not adversely affect other maps.
+        soup.select("g")[0]['transform']="scale({})".format(scale)
         # Current system marker ellipse
         group = soup.new_tag("g", id="select_marker", opacity="0", activated="0", transform="translate(0, 0)")
         ellipse = soup.new_tag("ellipse", cx="0", cy="0", rx="56", ry="28", style="fill:#462CFF")
