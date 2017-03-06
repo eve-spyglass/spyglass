@@ -134,6 +134,14 @@ class MainWindow(QtGui.QMainWindow):
             self.themeGroup.addAction(action)
             self.menuTheme.addAction(action)
         styles = None
+
+        #Set up the Auto Rescan Menu
+        self.rescanGroup = QActionGroup(self.menu)
+        action = QAction("Automagically Rescan on Window Change", None, checkable=True)
+        self.rescanGroup.addAction(action)
+        action = QAction("Rescan Intel Now!", None)
+        self.rescanGroup.addAction(action)
+
         #
         # Platform specific UI resizing - we size items in the resource files to look correct on the mac,
         # then resize other platforms as needed
@@ -150,7 +158,6 @@ class MainWindow(QtGui.QMainWindow):
         self.recallCachedSettings()
         self.setupThreads()
         self.setupMap(True)
-        #self.rescanIntel()
 
         initialTheme = self.cache.getFromCache("theme")
         if initialTheme:
@@ -322,6 +329,7 @@ class MainWindow(QtGui.QMainWindow):
     #     return False
 
     def rescanIntel(self):
+        logging.critical("Intel ReScan begun")
         now = datetime.datetime.now()
         for file in os.listdir(self.pathToLogs):
             if file.endswith(".txt"):
@@ -341,6 +349,19 @@ class MainWindow(QtGui.QMainWindow):
                         #print "new enough log: {}".format(file)
                         self.logFileChanged(filePath, True)
                         print "Reading Logs {}".format(roomname)
+
+    # def changeAutoRescanIntel(self, newValue=None):
+
+        # if newValue is None:
+        #     newValue =self.
+        # self.hide()
+        # self.alwaysOnTopAction.setChecked(newValue)
+        # if newValue:
+        #     self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+        # else:
+        #     self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowStaysOnTopHint))
+        # self.show()
+
 
 
     def startClipboardTimer(self):
