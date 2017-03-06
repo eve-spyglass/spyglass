@@ -17,6 +17,7 @@
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
 
+import os
 import datetime
 import sys
 import time
@@ -133,6 +134,14 @@ class MainWindow(QtGui.QMainWindow):
             self.themeGroup.addAction(action)
             self.menuTheme.addAction(action)
         styles = None
+
+        #Set up the Auto Rescan Menu
+        self.rescanGroup = QActionGroup(self.menu)
+        action = QAction("Automagically Rescan on Window Change", None, checkable=True)
+        self.rescanGroup.addAction(action)
+        action = QAction("Rescan Intel Now!", None)
+        self.rescanGroup.addAction(action)
+
         #
         # Platform specific UI resizing - we size items in the resource files to look correct on the mac,
         # then resize other platforms as needed
@@ -319,6 +328,41 @@ class MainWindow(QtGui.QMainWindow):
     #         return True
     #     return False
 
+    def rescanIntel(self):
+        logging.critical("Intel ReScan begun")
+        now = datetime.datetime.now()
+        for file in os.listdir(self.pathToLogs):
+            if file.endswith(".txt"):
+                filePath = (str(self.pathToLogs) + str(os.sep) + str(file))
+                roomname = file[:-20]
+
+                mtime = datetime.datetime.fromtimestamp(os.path.getmtime(filePath))
+                delta = (now - mtime)
+
+                #print "_______________________"
+                #print now.time()
+                #print mtime.time()
+                #print delta.total_seconds()
+
+                if delta.total_seconds() <(60 * 20) and delta.total_seconds() > 0:
+                    if roomname in self.roomnames:
+                        #print "new enough log: {}".format(file)
+                        self.logFileChanged(filePath, True)
+                        print "Reading Logs {}".format(roomname)
+
+    # def changeAutoRescanIntel(self, newValue=None):
+
+        # if newValue is None:
+        #     newValue =self.
+        # self.hide()
+        # self.alwaysOnTopAction.setChecked(newValue)
+        # if newValue:
+        #     self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+        # else:
+        #     self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowStaysOnTopHint))
+        # self.show()
+
+
 
     def startClipboardTimer(self):
         """
@@ -440,6 +484,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.critical("Setting new theme: {}".format(action.theme))
         self.cache.putIntoCache("theme", action.theme, 60 * 60 * 24 * 365)
         self.setupMap()
+        self.rescanIntel()
 
     def changeSound(self, newValue=None, disable=False):
         if disable:
@@ -814,8 +859,8 @@ class MainWindow(QtGui.QMainWindow):
         self.mapView.setZoomFactor(self.mapView.zoomFactor() - 0.1)
 
 
-    def logFileChanged(self, path):
-        messages = self.chatparser.fileModified(path)
+    def logFileChanged(self, path, rescan=False):
+        messages = self.chatparser.fileModified(path, rescan)
         for message in messages:
             # If players location has changed
             if message.status == states.LOCATION:

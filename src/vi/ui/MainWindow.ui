@@ -400,11 +400,17 @@
       <string>Theme</string>
      </property>
     </widget>
+    <widget class="QMenu" name="menuRescan">
+     <property name="title">
+      <string>Rescan Intel</string>
+     </property>
+    </widget>
     <addaction name="alwaysOnTopAction"/>
     <addaction name="framelessWindowAction"/>
     <addaction name="menuTransparency"/>
     <addaction name="separator"/>
     <addaction name="menuTheme"/>
+    <addaction name="menuRescan"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menuChat"/>
@@ -654,6 +660,11 @@
   <action name="actionDarkstyle">
    <property name="text">
     <string>darkstyle</string>
+   </property>
+  </action>
+  <action name="actionScan_on_Window_Change">
+   <property name="text">
+    <string>Scan on Window Change</string>
    </property>
   </action>
  </widget>
