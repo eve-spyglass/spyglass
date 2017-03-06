@@ -815,7 +815,9 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def logFileChanged(self, path):
+        logging.critical("change: {}". format(path))
         messages = self.chatparser.fileModified(path)
+        logging.critical("messages parsed {}".format(len(messages)))
         for message in messages:
             # If players location has changed
             if message.status == states.LOCATION:
@@ -832,6 +834,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.kosRequestThread.addRequest(parts, "xxx", False)
             # Otherwise consider it a 'normal' chat message
             elif message.user not in ("EVE-System", "EVE System") and message.status != states.IGNORE:
+                logging.critical("adding To intel {}".format(message.plainText))
                 self.addMessageToIntelChat(message)
                 # For each system that was mentioned in the message, check for alarm distance to the current system
                 # and alarm if within alarm distance.
@@ -847,7 +850,9 @@ class MainWindow(QtGui.QMainWindow):
                                 chars = nSystem.getLocatedCharacters()
                                 if len(chars) > 0 and message.user not in chars:
                                     self.trayIcon.showNotification(message, system.name, ", ".join(chars), distance)
+                                    logging.critical("ALARMED")
                 self.setMapContent(self.dotlan.svg)
+                logging.critical("Added to Map {}".format(message.plainText))
 
 
 class ChatroomsChooser(QtGui.QDialog):
