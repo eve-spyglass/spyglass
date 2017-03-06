@@ -193,7 +193,7 @@ class ChatParser(object):
                 message = Message("", "", timestamp, charname, [system, ], "", "", status)
         return message
 
-    def fileModified(self, path):
+    def fileModified(self, path, rescan=False):
         messages = []
         if path in self.ignoredPaths:
             return []
@@ -206,7 +206,10 @@ class ChatParser(object):
         if path not in self.fileData:
             # seems eve created a new file. New Files have 12 lines header
             self.fileData[path] = {"lines": 13}
-        oldLength = self.fileData[path]["lines"]
+        if not rescan:
+            oldLength = self.fileData[path]["lines"]
+        else:
+            oldLength = 13
         lines = self.addFile(path)
         if path in self.ignoredPaths:
             return []

@@ -17,6 +17,7 @@
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
 
+import os
 import datetime
 import sys
 import time
@@ -149,6 +150,7 @@ class MainWindow(QtGui.QMainWindow):
         self.recallCachedSettings()
         self.setupThreads()
         self.setupMap(True)
+        #self.rescanIntel()
 
         initialTheme = self.cache.getFromCache("theme")
         if initialTheme:
@@ -319,6 +321,27 @@ class MainWindow(QtGui.QMainWindow):
     #         return True
     #     return False
 
+    def rescanIntel(self):
+        now = datetime.datetime.now()
+        for file in os.listdir(self.pathToLogs):
+            if file.endswith(".txt"):
+                filePath = (str(self.pathToLogs) + str(os.sep) + str(file))
+                roomname = file[:-20]
+
+                mtime = datetime.datetime.fromtimestamp(os.path.getmtime(filePath))
+                delta = (now - mtime)
+
+                #print "_______________________"
+                #print now.time()
+                #print mtime.time()
+                #print delta.total_seconds()
+
+                if delta.total_seconds() <(60 * 20) and delta.total_seconds() > 0:
+                    if roomname in self.roomnames:
+                        #print "new enough log: {}".format(file)
+                        self.logFileChanged(filePath, True)
+                        print "Reading Logs {}".format(roomname)
+
 
     def startClipboardTimer(self):
         """
@@ -440,6 +463,7 @@ class MainWindow(QtGui.QMainWindow):
         logging.critical("Setting new theme: {}".format(action.theme))
         self.cache.putIntoCache("theme", action.theme, 60 * 60 * 24 * 365)
         self.setupMap()
+        self.rescanIntel()
 
     def changeSound(self, newValue=None, disable=False):
         if disable:
@@ -814,8 +838,8 @@ class MainWindow(QtGui.QMainWindow):
         self.mapView.setZoomFactor(self.mapView.zoomFactor() - 0.1)
 
 
-    def logFileChanged(self, path):
-        messages = self.chatparser.fileModified(path)
+    def logFileChanged(self, path, rescan=False):
+        messages = self.chatparser.fileModified(path, rescan)
         for message in messages:
             # If players location has changed
             if message.status == states.LOCATION:
