@@ -400,17 +400,11 @@
       <string>Theme</string>
      </property>
     </widget>
-    <widget class="QMenu" name="menuRescan">
-     <property name="title">
-      <string>Rescan Intel</string>
-     </property>
-    </widget>
     <addaction name="alwaysOnTopAction"/>
     <addaction name="framelessWindowAction"/>
     <addaction name="menuTransparency"/>
     <addaction name="separator"/>
     <addaction name="menuTheme"/>
-    <addaction name="menuRescan"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menuChat"/>
