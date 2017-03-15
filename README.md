@@ -35,6 +35,7 @@ Note this is an old screesnshot soon to be updated!
  - A pilot may be KOS-checked right from in-game chat channels.
  - Quick batch KOS-checking of the Local system when foregrounding Provi I.
  - Monitored intel chat channels are merged to one chat stream. You can add or remove channels via a menu option.
+ - These chat channels can be rescanned on startup to allow for existing intel to be displayed
  - An interactive map of Providence / Catch is provided. Systems on the map display real-time intel data as reported through intel channels.
  - Systems on the map display different color backgrounds as their alarms age, with text indicating how long ago the specific system was reported. Background color becomes red when a system is reported and lightens (red->orange->yellow->white) in the following intervals: 4min, 10min, 15min, and 25min.
  - Systems reported clear display on the map with a green background for 10 minutes.
@@ -53,6 +54,12 @@ Note this is an old screesnshot soon to be updated!
 This option must first be activated by checking the Provi I app menu: Menu > Auto KOS-Check Clipboard.
 To use this feature: click on a pilot in the local pilot list and then type the shortcuts for select-all and copy-selection. This places the pilots in local on your clipboard. Next switch to the Provi I app momentarily and back to Eve. KOS checking of these pilots will continue in the background.
 
+
+## Intel Rescan
+
+ - Provi I can look over all of your previous logs to check for intel. This is useful in two main cases. Firstly when you startup Provi I but have already had eve running and want to see the intel you have already collected. Secondly, when changing theme the intel in Provi I is all reset. You can rescan to get it back.
+ - By default automatically rescanning is disabled, this is so people dont complain of speed issues.
+ - THIS IS QUITE SLOW! looking over existing logs can be incredibly time consuming so if you use it, please be patient.
 
 ## KOS Results
 
@@ -119,6 +126,10 @@ Provi I runs on Mac (OS X), Windows and Linux. Windows standalone packages are p
 
 Yes it does. If you don't want to this, use a firewall to forbid it.
 Provi I looks for a new version at startup and loads dynamic infomation (i.e., jump bridge routes) from home. It will run without this connection but some functionality will be limited.
+
+Both of these actions route to amazon s3 servers requesting data.
+
+NO DATA IS SENT FROM YOU TO ME!
 
 **Provi I does not find my chatlogs or is not showing changes to chat when it should. What can I do?**
 
