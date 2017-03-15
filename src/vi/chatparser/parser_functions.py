@@ -88,7 +88,7 @@ def parseShips(rtext):
                 start = upperText.find(shipName)
                 end = start + len(shipName)
                 if ((start > 0 and upperText[start - 1] not in (" ", "X")) or (
-                        end < len(upperText) - 1 and upperText[end] not in ("S", " "))):
+                                end < len(upperText) - 1 and upperText[end] not in ("S", " "))):
                     hit = False
                 if hit:
                     shipInText = text[start:end]
@@ -98,9 +98,8 @@ def parseShips(rtext):
 
 
 def parseSystems(systems, rtext, foundSystems):
-    
     systemNames = systems.keys()
-    
+
     # words to ignore on the system parser. use UPPER CASE
     WORDS_TO_IGNORE = ("IN", "IS", "AS")
 
@@ -109,31 +108,31 @@ def parseSystems(systems, rtext, foundSystems):
         text = text.replace(word, newText.format(system, word))
         return text
 
-    texts = [t for t in rtext.contents if isinstance(t, NavigableString) and len(t)]    
+    texts = [t for t in rtext.contents if isinstance(t, NavigableString) and len(t)]
     for wtIdx, text in enumerate(texts):
         worktext = text
         for char in CHARS_TO_IGNORE:
             worktext = worktext.replace(char, "")
-            
+
         # Drop redundant whitespace so as to not throw off word index
         worktext = ' '.join(worktext.split())
         words = worktext.split(" ")
 
         for idx, word in enumerate(words):
-            
+
             # Is this about another a system's gate?
             if len(words) > idx + 1:
-                if words[idx+1].upper() == 'GATE':
+                if words[idx + 1].upper() == 'GATE':
                     bailout = True
                     if len(words) > idx + 2:
-                        if words[idx+2].upper() == 'TO':
+                        if words[idx + 2].upper() == 'TO':
                             # Could be '___ GATE TO somewhere' so check this one.
                             bailout = False
                     if bailout:
                         # '_____ GATE' mentioned in message, which is not what we're
                         # interested in, so go to checking next word.
                         continue
-            
+
             upperWord = word.upper()
             if upperWord != word and upperWord in WORDS_TO_IGNORE: continue
             if upperWord in systemNames:  # - direct hit on name
@@ -168,7 +167,7 @@ def parseSystems(systems, rtext, foundSystems):
                         formattedText = formatSystem(text, word, system)
                         textReplace(text, formattedText)
                         return True
-                        
+
     return False
 
 

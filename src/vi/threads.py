@@ -35,13 +35,12 @@ from vi.resources import resourcePath
 
 STATISTICS_UPDATE_INTERVAL_MSECS = 1 * 60 * 1000
 
-class AvatarFindThread(QThread):
 
+class AvatarFindThread(QThread):
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue()
         self.active = True
-
 
     def addChatEntry(self, chatEntry, clearCache=False):
         try:
@@ -53,7 +52,6 @@ class AvatarFindThread(QThread):
             self.queue.put(chatEntry)
         except Exception as e:
             logging.error("Error in AvatarFindThread: %s", e)
-
 
     def run(self):
         cache = Cache()
@@ -89,7 +87,6 @@ class AvatarFindThread(QThread):
             except Exception as e:
                 logging.error("Error in AvatarFindThread : %s", e)
 
-
     def quit(self):
         self.active = False
         self.queue.put(None)
@@ -97,13 +94,11 @@ class AvatarFindThread(QThread):
 
 
 class KOSCheckerThread(QThread):
-
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue()
         self.recentRequestNamesAndTimes = {}
         self.active = True
-
 
     def addRequest(self, names, requestType, onlyKos=False):
         try:
@@ -120,7 +115,6 @@ class KOSCheckerThread(QThread):
         except Exception as e:
             logging.error("Error in KOSCheckerThread.addRequest: %s", e)
 
-
     def run(self):
         while True:
             # Block waiting for addRequest() to enqueue something
@@ -128,7 +122,7 @@ class KOSCheckerThread(QThread):
             if not self.active:
                 return
             try:
-                #logging.info("KOSCheckerThread kos checking %s" %  str(names))
+                # logging.info("KOSCheckerThread kos checking %s" %  str(names))
                 hasKos = False
                 if not names:
                     continue
@@ -144,8 +138,9 @@ class KOSCheckerThread(QThread):
                 logging.error("Error in KOSCheckerThread.run: %s", e)
                 continue
 
-            logging.info("KOSCheckerThread emitting kos_result for: state = {0}, text = {1}, requestType = {2}, hasKos = {3}".format(
-                    "ok", text, requestType, hasKos))
+            logging.info(
+                    "KOSCheckerThread emitting kos_result for: state = {0}, text = {1}, requestType = {2}, hasKos = {3}".format(
+                            "ok", text, requestType, hasKos))
             self.emit(SIGNAL("kos_result"), "ok", text, requestType, hasKos)
 
     def quit(self):
@@ -155,7 +150,6 @@ class KOSCheckerThread(QThread):
 
 
 class MapStatisticsThread(QThread):
-
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue(maxsize=1)
@@ -164,10 +158,8 @@ class MapStatisticsThread(QThread):
         self.refreshTimer = None
         self.active = True
 
-
     def requestStatistics(self):
         self.queue.put(1)
-
 
     def run(self):
         self.refreshTimer = QTimer()
@@ -181,7 +173,7 @@ class MapStatisticsThread(QThread):
             logging.debug("MapStatisticsThread requesting statistics")
             try:
                 statistics = evegate.getSystemStatistics()
-                #time.sleep(2)  # sleeping to prevent a "need 2 arguments"-error
+                # time.sleep(2)  # sleeping to prevent a "need 2 arguments"-error
                 requestData = {"result": "ok", "statistics": statistics}
             except Exception as e:
                 logging.error("Error in MapStatisticsThread: %s", e)
@@ -191,11 +183,11 @@ class MapStatisticsThread(QThread):
             self.emit(SIGNAL("statistic_data_update"), requestData)
             logging.debug("MapStatisticsThread emitted statistic_data_update")
 
-
     def quit(self):
         self.active = False
         self.queue.put(None)
         QThread.quit(self)
+
 
 class VoiceOverThread(threading.Thread):
     def __init__(self):
@@ -213,17 +205,15 @@ class VoiceOverThread(threading.Thread):
     def run(self):
         while not self.stoprequest.is_set:
             try:
-                #Will block until it gets a something or times out
+                # Will block until it gets a something or times out
                 words = self.queue.get(True, 1)
-                #Init every time, only takes ~20us on slow machines and avoids colliding words
+                # Init every time, only takes ~20us on slow machines and avoids colliding words
                 self.engine = pyttsx.init()
                 self.engine.setProperty('rate', 160)
                 self.engine.setProperty('voice', 'english-us')
                 self.engine.say(words)
-                #should block until the end of the words
+                # should block until the end of the words
                 self.queue.task_done()
                 self.engine = None
             except Queue.Empty:
                 continue
-
-

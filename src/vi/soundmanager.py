@@ -109,7 +109,6 @@ class SoundManager(six.with_metaclass(Singleton)):
         isDarwin = sys.platform.startswith("darwin")
         volume = 25
 
-
         def __init__(self):
             QThread.__init__(self)
             self.queue = queue.Queue()
@@ -119,10 +118,8 @@ class SoundManager(six.with_metaclass(Singleton)):
                 self.player = None
             self.active = True
 
-
         def setVolume(self, volume):
             self.volume = volume
-
 
         def run(self):
             while True:
@@ -146,7 +143,6 @@ class SoundManager(six.with_metaclass(Singleton)):
                 self.player.delete()
             QThread.quit(self)
 
-
         def speak(self, message):
             if self.useGoogleTTS:
                 self.audioExtractToMp3(inputText=message)  # experimental
@@ -158,10 +154,8 @@ class SoundManager(six.with_metaclass(Singleton)):
                 return False
             return True
 
-
         def handleIdleTasks(self):
             self.speakRandomChuckNorrisJoke()
-
 
         # Audio subsytem access
 
@@ -193,7 +187,7 @@ class SoundManager(six.with_metaclass(Singleton)):
         def playTTS(self, inputText=''):
             try:
                 mp3url = 'http://api.voicerss.org/?c=WAV&key={self.VOICE_RSS_API_KEY}&src={inputText}&hl=en-us'.format(
-                    **locals())
+                        **locals())
                 self.playAudioFile(requests.get(mp3url, stream=True).raw)
                 time.sleep(.5)
             except requests.exceptions.RequestException as e:
@@ -210,7 +204,8 @@ class SoundManager(six.with_metaclass(Singleton)):
             if args is None:
                 args = audioArgs(language='en', output=open('output.mp3', 'w'))
             if type(args) is dict:
-                args = audioArgs(language=args.get('language', 'en'), output=open(args.get('output', 'output.mp3'), 'w'))
+                args = audioArgs(language=args.get('language', 'en'),
+                                 output=open(args.get('output', 'output.mp3'), 'w'))
             # Process inputText into chunks
             # Google TTS only accepts up to (and including) 100 characters long texts.
             # Split the text in segments of maximum 100 characters long.
@@ -219,8 +214,9 @@ class SoundManager(six.with_metaclass(Singleton)):
             # Download chunks and write them to the output file
             for idx, val in enumerate(combinedText):
                 mp3url = "http://translate.google.com/translate_tts?tl=%s&q=%s&total=%s&idx=%s&ie=UTF-8&client=t&key=%s" % (
-                args.language, requests.utils.quote(val), len(combinedText), idx, self.GOOGLE_TTS_API_KEY)
-                headers = {"Host": "translate.google.com", "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1)"}
+                    args.language, requests.utils.quote(val), len(combinedText), idx, self.GOOGLE_TTS_API_KEY)
+                headers = {"Host": "translate.google.com",
+                           "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1)"}
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 if len(val) > 0:

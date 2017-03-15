@@ -47,15 +47,14 @@ def exceptHook(exceptionType, exceptionValue, tracebackObject):
     except Exception:
         pass
 
+
 sys.excepthook = exceptHook
 backGroundColor = "#c6d9ec"
 
 
 class Application(QApplication):
-
     def __init__(self, args):
         super(Application, self).__init__(args)
-
 
         splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
         splash.show()
@@ -69,8 +68,9 @@ class Application(QApplication):
             if sys.platform.startswith("darwin"):
                 chatLogDirectory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "logs", "Chatlogs")
                 if not os.path.exists(chatLogDirectory):
-                    chatLogDirectory = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "Eve Online",
-                                          "p_drive", "User", "My Documents", "EVE", "logs", "Chatlogs")
+                    chatLogDirectory = os.path.join(os.path.expanduser("~"), "Library", "Application Support",
+                                                    "Eve Online",
+                                                    "p_drive", "User", "My Documents", "EVE", "logs", "Chatlogs")
             elif sys.platform.startswith("linux"):
                 chatLogDirectory = os.path.join(os.path.expanduser("~"), "EVE", "logs", "Chatlogs")
             elif sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
@@ -98,7 +98,7 @@ class Application(QApplication):
         logLevel = vintelCache.getFromCache("logging_level")
         if not logLevel:
             logLevel = logging.WARN
-        #logLevel = logging.INFO #For Testing
+        # logLevel = logging.INFO #For Testing
         backGroundColor = vintelCache.getFromCache("background_color")
         if backGroundColor:
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
@@ -111,7 +111,7 @@ class Application(QApplication):
         rootLogger.setLevel(level=logLevel)
 
         logFilename = vintelLogDirectory + "/output.log"
-        fileHandler = RotatingFileHandler(maxBytes=(1048576*5), backupCount=7, filename=logFilename, mode='a')
+        fileHandler = RotatingFileHandler(maxBytes=(1048576 * 5), backupCount=7, filename=logFilename, mode='a')
         fileHandler.setFormatter(formatter)
         rootLogger.addHandler(fileHandler)
 
@@ -136,7 +136,5 @@ class Application(QApplication):
 
 # The main application
 if __name__ == "__main__":
-
     app = Application(sys.argv)
     sys.exit(app.exec_())
-

@@ -3,8 +3,8 @@ import yaml
 
 from vi.resources import resourcePath
 
-class Styles:
 
+class Styles:
     defaultStyle = ""
     defaultCommons = ""
 
@@ -17,20 +17,19 @@ class Styles:
 
     def __init__(self):
 
-        #default theme
+        # default theme
         with open(resourcePath("vi/ui/res/styles/default.css")) as default:
             Styles.defaultStyle = default.read()
         with open(resourcePath("vi/ui/res/styles/default.yaml")) as default:
             Styles.defaultCommons = yaml.load(default)
         default = None
 
-        #dark theme
+        # dark theme
         with open(resourcePath("vi/ui/res/styles/dark.css")) as dark:
             Styles.darkStyle = dark.read()
         with open(resourcePath("vi/ui/res/styles/dark.yaml")) as dark:
             Styles.darkCommons = yaml.load(dark)
         dark = None
-
 
     def getStyles(self):
         return self.styleList
@@ -57,8 +56,8 @@ class Styles:
         else:
             logging.critical("Attempted to switch to unknown style: {}".format(style))
 
-class TextInverter():
 
+class TextInverter():
     def getTextColourFromBackground(self, colour):
         if colour[0] is '#':
             colour = colour[1:]
@@ -66,12 +65,13 @@ class TextInverter():
         green = int(colour[2:4], 16)
         blue = int(colour[4:6], 16)
 
-        #perceptive Luminance formula
+        # perceptive Luminance formula
         perc = 1 - (((0.299 * red) + (0.587 * green) + (0.114 * blue)) / 255)
         if perc < 0.5:
             return "#000000"
         else:
             return "#FFFFFF"
+
 
 if __name__ == "__main__":
     inv = TextInverter()

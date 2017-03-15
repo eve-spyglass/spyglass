@@ -37,7 +37,7 @@ def check(parts):
     names = [name.strip() for name in parts]
 
     try:
-        kosData = requests.get(CVA_KOS_URL, params = {'c': 'json', 'type': 'multi', 'q': ','.join(names)}).json()
+        kosData = requests.get(CVA_KOS_URL, params={'c': 'json', 'type': 'multi', 'q': ','.join(names)}).json()
     except RequestException as e:
         kosData = None
         logging.error("Error on pilot KOS check request %s", str(e))
@@ -48,11 +48,11 @@ def check(parts):
         names.remove(charname)
 
         if char["kos"] or char["corp"]["kos"] or char["corp"]["alliance"]["kos"]:
-           data[charname] = {"kos": KOS}
+            data[charname] = {"kos": KOS}
         elif corpname not in evegate.NPC_CORPS:
-           data[charname] = {"kos": NOT_KOS}
+            data[charname] = {"kos": NOT_KOS}
         else:
-           if char not in checkBylastChars:
+            if char not in checkBylastChars:
                 checkBylastChars.append(charname)
 
     # Names still in the list are not showing as KOS, so consider their last player corporation
@@ -91,12 +91,13 @@ def check(parts):
                     nameData["corp_to_check"] = corpname
                     break
 
-        corpsToCheck = set([nameData["corp_to_check"] for nameData in corpCheckData.values() if nameData["need_check"] == True])
+        corpsToCheck = set(
+                [nameData["corp_to_check"] for nameData in corpCheckData.values() if nameData["need_check"] == True])
         corpsResult = {}
 
         for corp in corpsToCheck:
             try:
-                kosData = requests.get(CVA_KOS_URL, params = { 'c': 'json', 'type': 'unit', 'q': corp }).json()
+                kosData = requests.get(CVA_KOS_URL, params={'c': 'json', 'type': 'unit', 'q': corp}).json()
             except RequestException as e:
                 logging.error("Error on corp KOS check request: %s", str(e))
 
@@ -115,9 +116,9 @@ def check(parts):
                 data[charname] = {"kos": UNKNOWN}
             if nameData["need_check"] and corpsResult[nameData["corp_to_check"]] == True:
 
-                #This conditional is to catch the odd cases where the KOS Checker returns nothing for a player, yet their corp is kos
+                # This conditional is to catch the odd cases where the KOS Checker returns nothing for a player, yet their corp is kos
                 if evegate.getCurrentCorpForCharId(namesAsIds[charname]) == nameData["corp_to_check"]:
-                    data[charname]={"kos": KOS}
+                    data[charname] = {"kos": KOS}
                 else:
                     data[charname] = {"kos": RED_BY_LAST}
             else:

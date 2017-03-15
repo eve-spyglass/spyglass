@@ -21,14 +21,19 @@ import sqlite3
 import threading
 import time
 import six
+
 if six.PY2:
     def to_blob(x):
         return buffer(str(x))
+
+
     def from_blob(x):
         return str(x[0][0])
 else:
     def to_blob(x):
         return x
+
+
     def from_blob(x):
         return x
 
@@ -161,5 +166,3 @@ class Cache(object):
                     getattr(obj, setting[1])(setting[2])
                 except Exception as e:
                     logging.error(e)
-
-

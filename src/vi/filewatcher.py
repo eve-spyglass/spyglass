@@ -39,6 +39,7 @@ if a new file was created. We watch only the newest (last 24h), not all!
 
 DEFAULT_MAX_AGE = 60 * 60 * 24
 
+
 class FileWatcher(QtCore.QThread):
     def __init__(self, path, maxAge=DEFAULT_MAX_AGE):
         QtCore.QThread.__init__(self)
@@ -52,10 +53,8 @@ class FileWatcher(QtCore.QThread):
         self.paused = True
         self.active = True
 
-
     def directoryChanged(self):
         self.updateWatchedFiles()
-
 
     def run(self):
         while True:
@@ -72,11 +71,9 @@ class FileWatcher(QtCore.QThread):
                     self.emit(SIGNAL("file_change"), path)
                 self.files[path] = pathStat.st_size
 
-
     def quit(self):
         self.active = False
         QtCore.QThread.quit(self)
-
 
     def updateWatchedFiles(self):
         # Reading all files from the directory

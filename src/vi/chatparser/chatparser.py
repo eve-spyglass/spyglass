@@ -21,13 +21,13 @@ import datetime
 import os
 import time
 import six
+
 if six.PY2:
     from io import open
 
 from bs4 import BeautifulSoup
 from vi import states
 from PyQt4.QtGui import QMessageBox
-
 
 from .parser_functions import parseStatus
 from .parser_functions import parseUrls, parseShips, parseSystems
@@ -71,7 +71,8 @@ class ChatParser(object):
                 content = f.read()
         except Exception as e:
             self.ignoredPaths.append(path)
-            QMessageBox.warning(None, "Read a log file failed!", "File: {0} - problem: {1}".format(path, six.text_type(e)), "OK")
+            QMessageBox.warning(None, "Read a log file failed!",
+                                "File: {0} - problem: {1}".format(path, six.text_type(e)), "OK")
             return None
 
         lines = content.split("\n")
@@ -119,12 +120,12 @@ class ChatParser(object):
         if upperText.startswith("XXX "):
             return Message(roomname, text, timestamp, username, systems, upperText, status=states.KOS_STATUS_REQUEST)
         elif roomname.startswith("="):
-            return Message(roomname, "xxx " + text, timestamp, username, systems, "XXX " + upperText, status=states.KOS_STATUS_REQUEST)
+            return Message(roomname, "xxx " + text, timestamp, username, systems, "XXX " + upperText,
+                           status=states.KOS_STATUS_REQUEST)
         elif upperText.startswith("VINTELSOUND_TEST"):
             return Message(roomname, text, timestamp, username, systems, upperText, status=states.SOUND_TEST)
         if roomname not in self.rooms:
             return None
-
 
         message = Message(roomname, "", timestamp, username, systems, text, originalText)
         # May happen if someone plays > 1 account
@@ -144,7 +145,8 @@ class ChatParser(object):
         # If message says clear and no system? Maybe an answer to a request?
         if status == states.CLEAR and not systems:
             maxSearch = 2  # we search only max_search messages in the room
-            for count, oldMessage in enumerate(oldMessage for oldMessage in self.knownMessages[-1::-1] if oldMessage.room == roomname):
+            for count, oldMessage in enumerate(
+                    oldMessage for oldMessage in self.knownMessages[-1::-1] if oldMessage.room == roomname):
                 if oldMessage.systems and oldMessage.status == states.REQUEST:
                     for system in oldMessage.systems:
                         systems.add(system)

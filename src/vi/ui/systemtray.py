@@ -125,14 +125,16 @@ class TrayIcon(QtGui.QSystemTrayIcon):
         text = None
         icon = None
         text = ""
-        if (message.status == states.ALARM and self.showAlarm and self.lastNotifications.get(states.ALARM, 0) < time.time() - self.MIN_WAIT_NOTIFICATION):
+        if (message.status == states.ALARM and self.showAlarm and self.lastNotifications.get(states.ALARM,
+                                                                                             0) < time.time() - self.MIN_WAIT_NOTIFICATION):
             title = "ALARM!"
             icon = 2
             speechText = (u"{0} alarmed in {1}, {2} jumps from {3}".format(system, room, distance, char))
             text = speechText + (u"\nText: %s" % text)
             SoundManager().playSound("alarm", text, speechText)
             self.lastNotifications[states.ALARM] = time.time()
-        elif (message.status == states.REQUEST and self.showRequest and self.lastNotifications.get(states.REQUEST, 0) < time.time() - self.MIN_WAIT_NOTIFICATION):
+        elif (message.status == states.REQUEST and self.showRequest and self.lastNotifications.get(states.REQUEST,
+                                                                                                   0) < time.time() - self.MIN_WAIT_NOTIFICATION):
             title = "Status request"
             icon = 1
             text = (u"Someone is requesting status of {0} in {1}.".format(system, room))

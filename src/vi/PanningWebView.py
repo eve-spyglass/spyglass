@@ -1,4 +1,3 @@
-
 from PyQt4.QtWebKit import QWebView
 from PyQt4.QtGui import *
 from PyQt4 import QtCore
@@ -6,8 +5,8 @@ from PyQt4.QtCore import QPoint
 from PyQt4.QtCore import QString
 from PyQt4.QtCore import QEvent
 
-class PanningWebView(QWebView):
 
+class PanningWebView(QWebView):
     def __init__(self, parent=None):
         super(PanningWebView, self).__init__()
         self.pressed = False
@@ -17,7 +16,6 @@ class PanningWebView(QWebView):
         self.offset = 0
         self.handIsClosed = False
         self.clickedInScrollBar = False
-
 
     def mousePressEvent(self, mouseEvent):
         pos = mouseEvent.pos()
@@ -45,7 +43,6 @@ class PanningWebView(QWebView):
 
         return QWebView.mousePressEvent(self, mouseEvent)
 
-
     def mouseReleaseEvent(self, mouseEvent):
         if self.clickedInScrollBar:
             self.clickedInScrollBar = False
@@ -67,7 +64,8 @@ class PanningWebView(QWebView):
                 self.handIsClosed = False
                 QApplication.restoreOverrideCursor()
 
-                event1 = QMouseEvent(QEvent.MouseButtonPress, self.position, QtCore.Qt.LeftButton, QtCore.Qt.LeftButton, QtCore.Qt.NoModifier)
+                event1 = QMouseEvent(QEvent.MouseButtonPress, self.position, QtCore.Qt.LeftButton, QtCore.Qt.LeftButton,
+                                     QtCore.Qt.NoModifier)
                 event2 = QMouseEvent(mouseEvent)
                 self.ignored.append(event1)
                 self.ignored.append(event2)
@@ -75,7 +73,6 @@ class PanningWebView(QWebView):
                 QApplication.postEvent(self, event2)
                 return
         return QWebView.mouseReleaseEvent(self, mouseEvent)
-
 
     def mouseMoveEvent(self, mouseEvent):
         if not self.clickedInScrollBar:
@@ -95,7 +92,6 @@ class PanningWebView(QWebView):
                 self.scrolling = True
                 return
         return QWebView.mouseMoveEvent(self, mouseEvent)
-
 
     def pointInScroller(self, position, orientation):
         rect = self.page().mainFrame().scrollBarGeometry(orientation)

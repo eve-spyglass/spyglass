@@ -142,8 +142,8 @@ class Map(object):
         if self.styles.getCommons()["change_lines"]:
             for line in soup.select("line"):
                 line["class"] = "j"
-        #Shrink the svg slightly. This is a fix for the compact map only to prevent clipping, but should not adversely affect other maps.
-        soup.select("g")[0]['transform']="scale({})".format(scale)
+        # Shrink the svg slightly. This is a fix for the compact map only to prevent clipping, but should not adversely affect other maps.
+        soup.select("g")[0]['transform'] = "scale({})".format(scale)
         # Current system marker ellipse
         group = soup.new_tag("g", id="select_marker", opacity="0", activated="0", transform="translate(0, 0)")
         ellipse = soup.new_tag("ellipse", cx="0", cy="0", rx="56", ry="28", style="fill:#462CFF")
@@ -212,7 +212,6 @@ class Map(object):
             for system in self.systemsById.values():
                 system.setStatistics(None)
         logging.info("addSystemStatistics complete")
-
 
     def setJumpbridges(self, jumpbridgesData):
         """
@@ -295,8 +294,10 @@ class System(object):
     styles = Styles()
     textInv = TextInverter()
 
-    ALARM_COLORS = [(60 * 4, "#FF0000", "#FFFFFF"), (60 * 10, "#FF9B0F", "#FFFFFF"), (60 * 15, "#FFFA0F", "#000000"), (60 * 25, "#FFFDA2", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
-    CLEAR_COLORS = [(60 * 4, "#00FF00", "#000000"), (60 * 10, "#80FF80", "#000000"), (60 * 15, "#80FF80", "#000000"), (60 * 25, "#C0FFC0", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
+    ALARM_COLORS = [(60 * 4, "#FF0000", "#FFFFFF"), (60 * 10, "#FF9B0F", "#FFFFFF"), (60 * 15, "#FFFA0F", "#000000"),
+                    (60 * 25, "#FFFDA2", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
+    CLEAR_COLORS = [(60 * 4, "#00FF00", "#000000"), (60 * 10, "#80FF80", "#000000"), (60 * 15, "#80FF80", "#000000"),
+                    (60 * 25, "#C0FFC0", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
     ALARM_COLOR = ALARM_COLORS[0][1]
     UNKNOWN_COLOR = styles.getCommons()["unknown_colour"]
     CLEAR_COLOR = CLEAR_COLORS[0][1]
@@ -342,7 +343,8 @@ class System(object):
         x = coords["x"] - 3 + offsetPoint[0]
         y = coords["y"] + offsetPoint[1]
         style = "fill:{0};stroke:{0};stroke-width:2;fill-opacity:0.4"
-        tag = self.mapSoup.new_tag("rect", x=x, y=y, width=coords["width"] + 1.5, height=coords["height"], id=idName, style=style.format(color), visibility="hidden")
+        tag = self.mapSoup.new_tag("rect", x=x, y=y, width=coords["width"] + 1.5, height=coords["height"], id=idName,
+                                   style=style.format(color), visibility="hidden")
         tag["class"] = ["jumpbridge", ]
         jumps = self.mapSoup.select("#jumps")[0]
         jumps.insert(0, tag)
@@ -364,8 +366,8 @@ class System(object):
         if not wasLocated:
             coords = self.mapCoordinates
             newTag = self.mapSoup.new_tag("ellipse", cx=coords["center_x"] - 2.5, cy=coords["center_y"], id=idName,
-                    rx=coords["width"] / 2 + 4, ry=coords["height"] / 2 + 4, style="fill:#8b008d",
-                    transform=self.transform)
+                                          rx=coords["width"] / 2 + 4, ry=coords["height"] / 2 + 4, style="fill:#8b008d",
+                                          transform=self.transform)
             jumps = self.mapSoup.select("#jumps")[0]
             jumps.insert(0, newTag)
 
@@ -439,7 +441,8 @@ class System(object):
             self.setBackgroundColor(self.ALARM_COLOR)
             self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
             self.secondLine["alarmtime"] = self.lastAlarmTime
-            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = "fill: {};".format(
+                self.textInv.getTextColourFromBackground(self.backgroundColor))
         elif newStatus == states.CLEAR:
             self.lastAlarmTime = time.time()
             self.setBackgroundColor(self.CLEAR_COLOR)
@@ -448,7 +451,8 @@ class System(object):
                 self.secondLine["class"].append("stopwatch")
             self.secondLine["alarmtime"] = self.lastAlarmTime
             self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = "fill: {};".format(
+                self.textInv.getTextColourFromBackground(self.backgroundColor))
             self.secondLine.string = "clear"
         elif newStatus == states.WAS_ALARMED:
             self.setBackgroundColor(self.UNKNOWN_COLOR)
@@ -458,8 +462,8 @@ class System(object):
             self.setBackgroundColor(self.UNKNOWN_COLOR)
             # second line in the rects is reserved for the clock
             self.secondLine.string = "?"
-#            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-#            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+        #            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+        #            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
         if newStatus not in (states.NOT_CHANGE, states.REQUEST):  # unknown not affect system status
             self.status = newStatus
 
@@ -473,9 +477,9 @@ class System(object):
 
     def update(self):
         # state changed?
-        #print (self.secondLine)
-        #self.firstLine["style"] = "fill: #FFFFFF" #System name
-        #self.secondLine["style"] = "fill: #FFFFFF" #Timer / ?
+        # print (self.secondLine)
+        # self.firstLine["style"] = "fill: #FFFFFF" #System name
+        # self.secondLine["style"] = "fill: #FFFFFF" #Timer / ?
 
         if (self.currentStyle is not self.styles.currentStyle):
             self.currentStyle = self.styles.currentStyle
@@ -510,9 +514,7 @@ class System(object):
                             self.updateLineColour()
                 string = "clr: {m:02d}:{s:02d}".format(m=minutes, s=seconds)
             self.secondLine.string = string
-        #print self.backgroundColor, self.name, self.status
-
-
+            # print self.backgroundColor, self.name, self.status
 
     def updateLineColour(self):
         lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
@@ -521,7 +523,8 @@ class System(object):
 
     def updateStyle(self):
         for i in range(5):
-            self.ALARM_COLORS[i] = (self.ALARM_COLORS[i][0], self.styles.getCommons()["alarm_colours"][i], self.textInv.getTextColourFromBackground(self.ALARM_COLORS[i][1]))
+            self.ALARM_COLORS[i] = (self.ALARM_COLORS[i][0], self.styles.getCommons()["alarm_colours"][i],
+                                    self.textInv.getTextColourFromBackground(self.ALARM_COLORS[i][1]))
         self.ALARM_COLOR = self.ALARM_COLORS[0][1]
         self.UNKNOWN_COLOR = self.styles.getCommons()["unknown_colour"]
         self.CLEAR_COLOR = self.styles.getCommons()["clear_colour"]

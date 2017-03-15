@@ -218,11 +218,13 @@ def getCorpidsForCharId(charId):
                 data.append(row["corporationid"])
     return data
 
+
 def getCurrentCorpForCharId(charId):
     """ Returns the ID of the players current corporation.
     """
     soup = getCharinfoForCharId(charId)
     return soup.corporation.string
+
 
 def getSystemStatistics():
     """ Reads the informations for all solarsystems from the EVE API
