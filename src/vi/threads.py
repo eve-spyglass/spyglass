@@ -29,6 +29,7 @@ from six.moves import queue
 from PyQt4.QtCore import QThread, SIGNAL, QTimer
 from vi import evegate
 from vi import koschecker
+from vi import states
 from vi.cache.cache import Cache
 from vi.resources import resourcePath
 

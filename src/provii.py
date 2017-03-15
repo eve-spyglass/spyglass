@@ -56,6 +56,10 @@ class Application(QApplication):
     def __init__(self, args):
         super(Application, self).__init__(args)
 
+
+        splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
+        splash.show()
+
         # Set up paths
         chatLogDirectory = ""
         if len(sys.argv) > 1:
@@ -90,17 +94,15 @@ class Application(QApplication):
         if not os.path.exists(vintelLogDirectory):
             os.mkdir(vintelLogDirectory)
 
-        splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
-
         vintelCache = Cache()
         logLevel = vintelCache.getFromCache("logging_level")
         if not logLevel:
             logLevel = logging.WARN
+        #logLevel = logging.INFO #For Testing
         backGroundColor = vintelCache.getFromCache("background_color")
         if backGroundColor:
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
 
-        splash.show()
         self.processEvents()
 
         # Setup logging for console and rotated log files

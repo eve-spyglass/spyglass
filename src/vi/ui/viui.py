@@ -24,6 +24,7 @@ import time
 import six
 import requests
 import webbrowser
+import threading
 
 import vi.version
 
@@ -86,6 +87,8 @@ class MainWindow(QtGui.QMainWindow):
         self.initialMapPosition = None
         self.mapPositionsDict = {}
 
+        self.autoRescanIntelEnabled = self.cache.getFromCache("changeAutoRescanIntel")
+
         # Load user's toon names
         self.knownPlayerNames = self.cache.getFromCache("known_player_names")
         if self.knownPlayerNames:
@@ -129,18 +132,11 @@ class MainWindow(QtGui.QMainWindow):
             action.theme = theme
             if action.theme == "default":
                 action.setChecked(True)
-            logging.info("Adding theme %")
+            logging.info("Adding theme {}".format(theme))
             self.connect(action, SIGNAL("triggered()"), self.changeTheme)
             self.themeGroup.addAction(action)
             self.menuTheme.addAction(action)
         styles = None
-
-        #Set up the Auto Rescan Menu
-        self.rescanGroup = QActionGroup(self.menu)
-        action = QAction("Automagically Rescan on Window Change", None, checkable=True)
-        self.rescanGroup.addAction(action)
-        action = QAction("Rescan Intel Now!", None)
-        self.rescanGroup.addAction(action)
 
         #
         # Platform specific UI resizing - we size items in the resource files to look correct on the mac,
@@ -211,6 +207,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.quitAction, SIGNAL("triggered()"), self.close)
         self.connect(self.trayIcon, SIGNAL("quit"), self.close)
         self.connect(self.jumpbridgeDataAction, SIGNAL("triggered()"), self.showJumbridgeChooser)
+        self.connect(self.rescanNowAction, SIGNAL("triggered()"), self.rescanIntel)
+        self.connect(self.clearIntelAction, SIGNAL("triggered()"), self.clearIntelChat)
+        self.connect(self.autoRescanAction, SIGNAL("triggered()"), self.changeAutoRescanIntel)
         self.mapView.page().scrollRequested.connect(self.mapPositionChanged)
 
 
@@ -329,7 +328,9 @@ class MainWindow(QtGui.QMainWindow):
     #     return False
 
     def rescanIntel(self):
-        logging.critical("Intel ReScan begun")
+        logging.info("Intel ReScan begun")
+        self.clearIntelChat()
+
         now = datetime.datetime.now()
         for file in os.listdir(self.pathToLogs):
             if file.endswith(".txt"):
@@ -339,29 +340,11 @@ class MainWindow(QtGui.QMainWindow):
                 mtime = datetime.datetime.fromtimestamp(os.path.getmtime(filePath))
                 delta = (now - mtime)
 
-                #print "_______________________"
-                #print now.time()
-                #print mtime.time()
-                #print delta.total_seconds()
 
                 if delta.total_seconds() <(60 * 20) and delta.total_seconds() > 0:
                     if roomname in self.roomnames:
-                        #print "new enough log: {}".format(file)
+                        logging.info("Reading log {}".format(roomname))
                         self.logFileChanged(filePath, True)
-                        print "Reading Logs {}".format(roomname)
-
-    # def changeAutoRescanIntel(self, newValue=None):
-
-        # if newValue is None:
-        #     newValue =self.
-        # self.hide()
-        # self.alwaysOnTopAction.setChecked(newValue)
-        # if newValue:
-        #     self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
-        # else:
-        #     self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowStaysOnTopHint))
-        # self.show()
-
 
 
     def startClipboardTimer(self):
@@ -406,7 +389,8 @@ class MainWindow(QtGui.QMainWindow):
                     (None, "changeFrameless", self.framelessWindowAction.isChecked()),
                     (None, "changeUseSpokenNotifications", self.useSpokenNotificationsAction.isChecked()),
                     (None, "changeKosCheckClipboard", self.kosClipboardActiveAction.isChecked()),
-                    (None, "changeAutoScanIntel", self.scanIntelForKosRequestsEnabled))
+                    (None, "changeAutoScanIntel", self.scanIntelForKosRequestsEnabled),
+                    (None, "changeAutoRescanIntel", self.autoRescanIntelEnabled))
         self.cache.putIntoCache("settings", str(settings), 60 * 60 * 24 * 30)
 
         # Stop the threads
@@ -451,7 +435,13 @@ class MainWindow(QtGui.QMainWindow):
         if newValue is None:
             newValue = self.autoScanIntelAction.isChecked()
         self.autoScanIntelAction.setChecked(newValue)
-        self.scanIntelForKosRequestsEnabled = newValue
+        self.autoRescanIntelEnabled = newValue
+
+    def changeAutoRescanIntel(self, newValue=None):
+        if newValue is None:
+            newValue = self.autoRescanAction.isChecked()
+        self.autoRescanAction.setChecked(newValue)
+        self.autoRescanIntelEnabled = newValue
 
     def changeUseSpokenNotifications(self, newValue=None):
         if SoundManager().platformSupportsSpeech():
@@ -484,7 +474,9 @@ class MainWindow(QtGui.QMainWindow):
         logging.critical("Setting new theme: {}".format(action.theme))
         self.cache.putIntoCache("theme", action.theme, 60 * 60 * 24 * 365)
         self.setupMap()
-        self.rescanIntel()
+        self.clearIntelChat()
+        if self.autoRescanIntelEnabled:
+            self.rescanIntel()
 
     def changeSound(self, newValue=None, disable=False):
         if disable:
@@ -606,8 +598,8 @@ class MainWindow(QtGui.QMainWindow):
         sc.show()
 
 
-    def markSystemOnMap(self, systemname):
-        self.systems[six.text_type(systemname)].mark()
+    def markSystemOnMap(self, systemname, timeA=time.time()):
+        self.systems[six.text_type(systemname)].mark(timeA)
         self.updateMapView()
 
 
@@ -730,7 +722,7 @@ class MainWindow(QtGui.QMainWindow):
         chooser.show()
 
 
-    def addMessageToIntelChat(self, message):
+    def addMessageToIntelChat(self, message, timeA=time.time()):
         scrollToBottom = False
         if (self.chatListWidget.verticalScrollBar().value() == self.chatListWidget.verticalScrollBar().maximum()):
             scrollToBottom = True
@@ -742,11 +734,26 @@ class MainWindow(QtGui.QMainWindow):
         self.avatarFindThread.addChatEntry(chatEntryWidget)
         self.chatEntries.append(chatEntryWidget)
         self.connect(chatEntryWidget, SIGNAL("mark_system"), self.markSystemOnMap)
-        self.emit(SIGNAL("chat_message_added"), chatEntryWidget)
+        self.emit(SIGNAL("chat_message_added"), chatEntryWidget, timeA)
         self.pruneMessages()
         if scrollToBottom:
             self.chatListWidget.scrollToBottom()
 
+
+    def clearIntelChat(self):
+        logging.info("Clearing Intel")
+        self.setupMap()
+        try:
+            for row in range(self.chatListWidget.count()):
+                item = self.chatListWidget.item(0)
+                entry = self.chatListWidget.itemWidget(item)
+                message = entry.message
+                self.chatEntries.remove(entry)
+                self.chatListWidget.takeItem(0)
+                for widgetInMessage in message.widgets:
+                    widgetInMessage.removeItemWidget(item)
+        except Exception as e:
+            logging.error(e)
 
     def pruneMessages(self):
         try:
@@ -859,6 +866,8 @@ class MainWindow(QtGui.QMainWindow):
         self.mapView.setZoomFactor(self.mapView.zoomFactor() - 0.1)
 
 
+
+
     def logFileChanged(self, path, rescan=False):
         messages = self.chatparser.fileModified(path, rescan)
         for message in messages:
@@ -877,7 +886,7 @@ class MainWindow(QtGui.QMainWindow):
                     self.kosRequestThread.addRequest(parts, "xxx", False)
             # Otherwise consider it a 'normal' chat message
             elif message.user not in ("EVE-System", "EVE System") and message.status != states.IGNORE:
-                self.addMessageToIntelChat(message)
+                self.addMessageToIntelChat(message, message.timestamp)
                 # For each system that was mentioned in the message, check for alarm distance to the current system
                 # and alarm if within alarm distance.
                 systemList = self.dotlan.systems
@@ -1083,8 +1092,13 @@ class ChatEntryWidget(QtGui.QWidget):
         if pixmap.isNull():
             return False
         scaledAvatar = pixmap.scaled(32, 32)
-        self.avatarLabel.setPixmap(scaledAvatar)
-        return True
+        try:
+            self.avatarLabel.setPixmap(scaledAvatar)
+            return True
+        except Exception as ex:
+            #logging.warn("Updating a deleted chat item")
+            self.avatarLabel = None
+            self = None
 
 
     def changeFontSize(self, newSize):

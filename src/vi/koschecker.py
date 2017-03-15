@@ -48,11 +48,11 @@ def check(parts):
         names.remove(charname)
 
         if char["kos"] or char["corp"]["kos"] or char["corp"]["alliance"]["kos"]:
-            data[charname] = {"kos": KOS}
+           data[charname] = {"kos": KOS}
         elif corpname not in evegate.NPC_CORPS:
-            data[charname] = {"kos": NOT_KOS}
+           data[charname] = {"kos": NOT_KOS}
         else:
-            if char not in checkBylastChars:
+           if char not in checkBylastChars:
                 checkBylastChars.append(charname)
 
     # Names still in the list are not showing as KOS, so consider their last player corporation
@@ -87,6 +87,7 @@ def check(parts):
             for corpname in nameData["corpnames"]:
                 if corpname not in evegate.NPC_CORPS:
                     nameData["need_check"] = True
+                    nameData["corpid_to_check"] = corpIdName.keys()[corpIdName.values().index(corpname)]
                     nameData["corp_to_check"] = corpname
                     break
 
@@ -102,10 +103,11 @@ def check(parts):
             kosResult = False
 
             for result in kosData["results"]:
-                if result["kos"] == True:
-                    kosResult = True
-                elif "alliance" in result and result["alliance"]["kos"] == True:
-                    kosResult = True
+                if nameData["corpid_to_check"] == result["eveid"]:
+                    if result["kos"] == True:
+                        kosResult = True
+                    elif "alliance" in result and result["alliance"]["kos"] == True:
+                        kosResult = True
             corpsResult[corp] = kosResult
 
         for charname, nameData in corpCheckData.items():

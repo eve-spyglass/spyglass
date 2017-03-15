@@ -347,14 +347,14 @@ class System(object):
         jumps = self.mapSoup.select("#jumps")[0]
         jumps.insert(0, tag)
 
-    def mark(self):
+    def mark(self, timeA):
         marker = self.mapSoup.select("#select_marker")[0]
         offsetPoint = self.getTransformOffsetPoint()
         x = self.mapCoordinates["center_x"] + offsetPoint[0]
         y = self.mapCoordinates["center_y"] + offsetPoint[1]
         marker["transform"] = "translate({x},{y})".format(x=x, y=y)
         marker["opacity"] = "1"
-        marker["activated"] = time.time()
+        marker["activated"] = timeA
 
     def addLocatedCharacter(self, charname):
         idName = self.name + u"_loc"
