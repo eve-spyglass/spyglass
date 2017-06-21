@@ -4,4 +4,4 @@
 *.pyproj
 src/build/*
 src/dist/*
-
+.travis.yml

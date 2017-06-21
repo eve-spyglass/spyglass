@@ -1,6 +1,6 @@
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
@@ -84,7 +84,7 @@ class TrayIcon(QtGui.QSystemTrayIcon):
     def __init__(self, app):
         self.icon = QIcon(resourcePath("vi/ui/res/logo_small.png"))
         QSystemTrayIcon.__init__(self, self.icon, app)
-        self.setToolTip("Your Provi I Information Service! :)")
+        self.setToolTip("Your Spyglass Information Service! :)")
         self.lastNotifications = {}
         self.setContextMenu(TrayContextMenu(self))
         self.showAlarm = True

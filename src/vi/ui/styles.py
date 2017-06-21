@@ -1,3 +1,22 @@
+###########################################################################
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
+#																		  #
+#  This program is free software: you can redistribute it and/or modify	  #
+#  it under the terms of the GNU General Public License as published by	  #
+#  the Free Software Foundation, either version 3 of the License, or	  #
+#  (at your option) any later version.									  #
+#																		  #
+#  This program is distributed in the hope that it will be useful,		  #
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
+#  GNU General Public License for more details.							  #
+#																		  #
+#																		  #
+#  You should have received a copy of the GNU General Public License	  #
+#  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
+###########################################################################
+
 import logging
 import yaml
 
@@ -11,23 +30,23 @@ class Styles:
     darkStyle = ""
     darkCommons = ""
 
-    styleList = ["default", "darkstyle"]
+    styleList = ["light", "abyss"]
 
-    currentStyle = "default"
+    currentStyle = "light"
 
     def __init__(self):
 
         # default theme
-        with open(resourcePath("vi/ui/res/styles/default.css")) as default:
+        with open(resourcePath("vi/ui/res/styles/light.css")) as default:
             Styles.defaultStyle = default.read()
-        with open(resourcePath("vi/ui/res/styles/default.yaml")) as default:
+        with open(resourcePath("vi/ui/res/styles/light.yaml")) as default:
             Styles.defaultCommons = yaml.load(default)
         default = None
 
         # dark theme
-        with open(resourcePath("vi/ui/res/styles/dark.css")) as dark:
+        with open(resourcePath("vi/ui/res/styles/abyss.css")) as dark:
             Styles.darkStyle = dark.read()
-        with open(resourcePath("vi/ui/res/styles/dark.yaml")) as dark:
+        with open(resourcePath("vi/ui/res/styles/abyss.yaml")) as dark:
             Styles.darkCommons = yaml.load(dark)
         dark = None
 
@@ -35,17 +54,17 @@ class Styles:
         return self.styleList
 
     def getStyle(self):
-        if (Styles.currentStyle == "default"):
+        if (Styles.currentStyle == "light"):
             return self.defaultStyle
-        elif Styles.currentStyle == "darkstyle":
+        elif Styles.currentStyle == "abyss":
             return self.darkStyle
         else:
             return ""
 
     def getCommons(self):
-        if (Styles.currentStyle == "default"):
+        if (Styles.currentStyle == "light"):
             return Styles.defaultCommons
-        elif Styles.currentStyle == "darkstyle":
+        elif Styles.currentStyle == "abyss":
             return Styles.darkCommons
         else:
             return ""

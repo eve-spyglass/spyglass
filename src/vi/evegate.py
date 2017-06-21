@@ -1,6 +1,6 @@
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #

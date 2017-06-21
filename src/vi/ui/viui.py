@@ -1,6 +1,6 @@
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
@@ -63,7 +63,7 @@ class MainWindow(QtGui.QMainWindow):
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
         uic.loadUi(resourcePath('vi/ui/MainWindow.ui'), self)
         self.setWindowTitle(
-            "Provi I " + vi.version.VERSION + "{dev}".format(dev="-SNAPSHOT" if vi.version.SNAPSHOT else ""))
+            "Spyglass " + vi.version.VERSION + "{dev}".format(dev="-SNAPSHOT" if vi.version.SNAPSHOT else ""))
         self.taskbarIconQuiescent = QtGui.QIcon(resourcePath("vi/ui/res/logo_small.png"))
         self.taskbarIconWorking = QtGui.QIcon(resourcePath("vi/ui/res/logo_small_green.png"))
         self.setWindowIcon(self.taskbarIconQuiescent)
@@ -94,7 +94,7 @@ class MainWindow(QtGui.QMainWindow):
             self.knownPlayerNames = set(self.knownPlayerNames.split(","))
         else:
             self.knownPlayerNames = set()
-            diagText = "Provi I scans EVE system logs and remembers your characters as they change systems.\n\nSome features (clipboard KOS checking, alarms, etc.) may not work until your character(s) have been registered. Change systems, with each character you want to monitor, while Provi I is running to remedy this."
+            diagText = "Spyglass scans EVE system logs and remembers your characters as they change systems.\n\nSome features (clipboard KOS checking, alarms, etc.) may not work until your character(s) have been registered. Change systems, with each character you want to monitor, while Spyglass is running to remedy this."
             QMessageBox.warning(None, "Known Characters not Found", diagText, "Ok")
 
         # Set up user's intel rooms
@@ -409,7 +409,7 @@ class MainWindow(QtGui.QMainWindow):
         event.accept()
 
     def notifyNewerVersion(self, newestVersion):
-        self.trayIcon.showMessage("Newer Version", ("An update is available for Provi I.\n www.crypta.tech"), 1)
+        self.trayIcon.showMessage("Newer Version", ("An update is available for Spyglass.\n www.crypta.tech"), 1)
 
     def changeChatVisibility(self, newValue=None):
         if newValue is None:
@@ -761,7 +761,7 @@ class MainWindow(QtGui.QMainWindow):
                         text = "None KOS"
                     self.trayIcon.showMessage("Your KOS-Check", text, 1)
                 text = text.replace("\n\n", "<br>")
-                message = chatparser.chatparser.Message("Provi I KOS-Check", text, evegate.currentEveTime(), "Provi I",
+                message = chatparser.chatparser.Message("Spyglass KOS-Check", text, evegate.currentEveTime(), "Spyglass",
                                                         [], states.NOT_CHANGE, text.upper(), text)
                 self.addMessageToIntelChat(message)
             elif state == "error":

@@ -1,11 +1,11 @@
 # -*- mode: python -*-
 import sys
 
-app_name = 'provii'
+app_name = 'spyglass'
 block_cipher = None
 
-a = Analysis(['provii.py'],
-             pathex=['c:\\projects\\provii\\src' if sys.platform == 'win32' else '/home/michael/provi-i/src'],
+a = Analysis(['spyglass.py'],
+             pathex=['c:\\projects\\spyglass\\src' if sys.platform == 'win32' else '/home/michael/spyglass/src'],
              binaries=None,
              datas=None,
              hiddenimports=[],

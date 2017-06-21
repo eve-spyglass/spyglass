@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
@@ -85,12 +85,12 @@ class Application(QApplication):
             sys.exit(1)
 
         # Setting local directory for cache and logging
-        proviiDirectory = os.path.join(os.path.dirname(os.path.dirname(chatLogDirectory)), "provii")
-        if not os.path.exists(proviiDirectory):
-            os.mkdir(proviiDirectory)
-        cache.Cache.PATH_TO_CACHE = os.path.join(proviiDirectory, "cache-2.sqlite3")
+        spyglassDir = os.path.join(os.path.dirname(os.path.dirname(chatLogDirectory)), "spyglass")
+        if not os.path.exists(spyglassDir):
+            os.mkdir(spyglassDir)
+        cache.Cache.PATH_TO_CACHE = os.path.join(spyglassDir, "cache-2.sqlite3")
 
-        vintelLogDirectory = os.path.join(proviiDirectory, "logs")
+        vintelLogDirectory = os.path.join(spyglassDir, "logs")
         if not os.path.exists(vintelLogDirectory):
             os.mkdir(vintelLogDirectory)
 
@@ -120,7 +120,7 @@ class Application(QApplication):
         rootLogger.addHandler(consoleHandler)
 
         logging.critical("")
-        logging.critical("------------------- Provi I %s starting up -------------------", version.VERSION)
+        logging.critical("------------------- Spyglass %s starting up -------------------", version.VERSION)
         logging.critical("")
         logging.debug("Looking for chat logs at: %s", chatLogDirectory)
         logging.debug("Cache maintained here: %s", cache.Cache.PATH_TO_CACHE)

@@ -1,6 +1,6 @@
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
@@ -38,7 +38,7 @@ def getJumpbridgeData(region):
             data = json.loads(data)
         else:
             data = []
-            url = "https://s3-ap-southeast-2.amazonaws.com/provii-resource/{region}_jb.txt"
+            url = "https://s3-ap-southeast-2.amazonaws.com/spyglass-resource/{region}_jb.txt"
             resp = requests.get(url.format(region=region))
             for line in resp.iter_lines(decode_unicode=True):
                 splits = line.strip().split()
@@ -53,7 +53,7 @@ def getJumpbridgeData(region):
 
 def getNewestVersion():
     try:
-        url = "https://s3-ap-southeast-2.amazonaws.com/provii-resource/current_version.txt"
+        url = "https://s3-ap-southeast-2.amazonaws.com/spyglass-resource/current_version.txt"
         newestVersion = requests.get(url).text
         return newestVersion
     except Exception as e:

@@ -1,6 +1,6 @@
 ###########################################################################
-#  Vintel - Visual Intel Chat Analyzer									  #
-#  Copyright (C) 2014-15 Sebastian Meyer (sparrow.242.de+eve@gmail.com )  #
+#  Spyglass - Visual Intel Chat Analyzer								  #
+#  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
 #																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
@@ -66,7 +66,7 @@ class AvatarFindThread(QThread):
                 charname = chatEntry.message.user
                 logging.debug("AvatarFindThread getting avatar for %s" % charname)
                 avatar = None
-                if charname == "PROVI I":
+                if charname == "SPYGLASS":
                     with open(resourcePath("vi/ui/res/logo_small.png"), "rb") as f:
                         avatar = f.read()
                 if not avatar:
