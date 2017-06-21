@@ -267,8 +267,6 @@ class Map(object):
             line["fill"] = "red"
         self._statisticsVisible = newStatus
 
-        print self.soup
-
         return newStatus
 
     def changeJumpbridgesVisibility(self):
