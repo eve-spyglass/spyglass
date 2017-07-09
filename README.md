@@ -16,9 +16,7 @@ Spyglass is written with Python 2.7, using PyQt4 for the graphical interface, Be
 
 ## Screenshot
 
-![](http://www.crypta.tech/wp-content/uploads/2017/02/VI_px.png)
-
-Note this is an old screesnshot soon to be updated!
+![](http://www.crypta.tech/wp-content/uploads/2017/05/provii_normalTheme.png)
 
 ## Features
 
@@ -51,6 +49,7 @@ To use this feature: click on a pilot in the local pilot list and then type the 
  - Spyglass can look over all of your previous logs to check for intel. This is useful in two main cases. Firstly when you startup Spyglass but have already had eve running and want to see the intel you have already collected. Secondly, when changing theme the intel in Spyglass is all reset. You can rescan to get it back.
  - By default automatically rescanning is disabled, this is so people dont complain of speed issues.
  - THIS IS VERY SLOW! looking over existing logs can be incredibly time consuming so if you use it, please be patient. This is espicaially the case for more characters/chat channels you have.
+ - If you want to use thi feature, but find it to be too slow, clear out your chatlogs regularly.
 
 ## KOS Results
 
@@ -130,7 +129,7 @@ Spyglass looks for your chat logs in ~\EVE\logs\chatlogs and ~\DOCUMENTS\EVE\log
 
 Examples:
 
-`win> spyglass-1.3.0.exe "d:\strange\path\EVE\logs\chatlogs"`
+`win> spyglass-1.x.x.exe "d:\strange\path\EVE\logs\chatlogs"`
 
     – or –
 
@@ -138,7 +137,7 @@ Examples:
 
 **Spyglass does not start! What can I do?**
 
-Please try to delete Spyglass's Cache. It is located in the EVE-directory where the chatlogs are in. If your chatlogs are in \Documents\EVE\logs\chatlogs Spyglass writes the cachte to \Documents\EVE\spyglass
+Please try to delete Spyglass's Cache. It is located in the EVE-directory where the chatlogs are in. If your chatlogs are in \Documents\EVE\logs\chatlogs Spyglass writes the cache to \Documents\EVE\spyglass
 
 **Spyglass takes many seconds to start up; what are some of the causes and what can I do about it?**
 
