@@ -334,7 +334,7 @@ class MainWindow(QtGui.QMainWindow):
         now = datetime.datetime.now()
         for file in os.listdir(self.pathToLogs):
             if file.endswith(".txt"):
-                filePath = (str(self.pathToLogs) + str(os.sep) + str(file))
+                filePath = self.pathToLogs + six.text_type(os.sep) + file
                 roomname = file[:-20]
 
                 mtime = datetime.datetime.fromtimestamp(os.path.getmtime(filePath))
