@@ -40,7 +40,6 @@ def charnameToId(name):
     try:
         url = "https://esi.evetech.net/latest/search/?categories=character&datasource=tranquility&language=en-us&search={}&strict=true"
         content = requests.get(url.format(name)).json()
-        print(content["character"])
         return content["character"][0]
 
     except Exception as e:
@@ -142,7 +141,6 @@ def getAvatarForPlayer(charname):
         charId = charnameToId(charname)
         if charId:
             imageUrl = "http://image.eveonline.com/Character/{id}_{size}.jpg"
-            print(imageUrl.format(id=charId, size=32))
             avatar = requests.get(imageUrl.format(id=charId, size=32)).content
     except Exception as e:
         logging.error("Exception during getAvatarForPlayer: %s", e)
