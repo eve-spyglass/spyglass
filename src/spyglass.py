@@ -33,6 +33,7 @@ from vi.cache import cache
 from vi.resources import resourcePath
 from vi.cache.cache import Cache
 from PyQt4.QtGui import QApplication, QMessageBox
+import sip
 
 
 def exceptHook(exceptionType, exceptionValue, tracebackObject):
@@ -98,7 +99,7 @@ class Application(QApplication):
         logLevel = vintelCache.getFromCache("logging_level")
         if not logLevel:
             logLevel = logging.WARN
-        # logLevel = logging.INFO #For Testing
+        logLevel = logging.INFO #For Testing
         backGroundColor = vintelCache.getFromCache("background_color")
         if backGroundColor:
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
