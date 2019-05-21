@@ -5,7 +5,7 @@ app_name = 'spyglass'
 block_cipher = None
 
 a = Analysis(['spyglass.py'],
-             pathex=['c:\\projects\\spyglass\\src' if sys.platform == 'win32' else '/home/michael/spyglass/src'],
+             pathex=['C:\\Users\\Michael\\PycharmProjects\\spyglass\\src' if sys.platform == 'win32' else '/home/michael/spyglass/src'],
              binaries=None,
              datas=None,
              hiddenimports=[],
@@ -28,6 +28,7 @@ a.datas += [('vi/ui/MainWindow.ui', 'vi/ui/MainWindow.ui', 'DATA'),
             ('vi/ui/JumpbridgeChooser.ui', 'vi/ui/JumpbridgeChooser.ui', 'DATA'),
             ('vi/ui/res/qmark.png', 'vi/ui/res/qmark.png', 'DATA'),
             ('vi/ui/res/logo.png', 'vi/ui/res/logo.png', 'DATA'),
+            ('vi/ui/res/logo_splash.png', 'vi/ui/res/logo_splash.png', 'DATA'),
             ('vi/ui/res/logo_small.png', 'vi/ui/res/logo_small.png', 'DATA'),
             ('vi/ui/res/logo_small_green.png', 'vi/ui/res/logo_small_green.png', 'DATA'),
             ('vi/ui/res/178028__zimbot__bosun-whistle-sttos-recreated.wav', 'vi/ui/res/178028__zimbot__bosun-whistle-sttos-recreated.wav', 'DATA'),

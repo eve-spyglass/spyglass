@@ -645,6 +645,7 @@ class MainWindow(QtGui.QMainWindow):
         SoundManager().setSoundVolume(value)
 
     def setJumpbridges(self, url):
+        logging.info("setJB")
         if url is None:
             url = ""
         try:
@@ -670,6 +671,7 @@ class MainWindow(QtGui.QMainWindow):
             self.dotlan.setJumpbridges(data)
             self.cache.putIntoCache("jumpbridge_url", url, 60 * 60 * 24 * 365 * 8)
         except Exception as e:
+            logging.error("Error: {0}".format(six.text_type(e)))
             QMessageBox.warning(None, "Loading jumpbridges failed!", "Error: {0}".format(six.text_type(e)), "OK")
 
     def handleRegionMenuItemSelected(self, menuAction=None):

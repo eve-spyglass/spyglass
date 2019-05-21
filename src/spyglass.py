@@ -60,10 +60,15 @@ class Application(QApplication):
         splash = QtGui.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
         splash.show()
 
+        if version.SNAPSHOT:
+            QMessageBox.critical(None, "Snapshot", "This is a snapshot release... Use as you will....")
+
         # Set up paths
         chatLogDirectory = ""
         if len(sys.argv) > 1:
             chatLogDirectory = sys.argv[1]
+
+        print(sys.platform  )
 
         if not os.path.exists(chatLogDirectory):
             if sys.platform.startswith("darwin"):
@@ -75,11 +80,17 @@ class Application(QApplication):
             elif sys.platform.startswith("linux"):
                 chatLogDirectory = os.path.join(os.path.expanduser("~"), "EVE", "logs", "Chatlogs")
             elif sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
-                import ctypes.wintypes
-                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-                ctypes.windll.shell32.SHGetFolderPathW(0, 5, 0, 0, buf)
-                documentsPath = buf.value
-                chatLogDirectory = os.path.join(documentsPath, "EVE", "logs", "Chatlogs")
+                #import ctypes.wintypes
+                #buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+                #ctypes.windll.shell32.SHGetFolderPathW(0, 5, 0, 0, buf)
+                #documentsPath = buf.value
+                from os.path import expanduser
+                home = expanduser("~")
+                chatLogDirectory = os.path.join(home, "Documents", "EVE", "logs", "Chatlogs")
+
+                # Now I need to just make sure... Some old pcs could still be on XP
+                if not os.path.exists(chatLogDirectory):
+                    chatLogDirectory = os.path.join(home, "My Documents", "EVE", "logs", "Chatlogs")
         if not os.path.exists(chatLogDirectory):
             # None of the paths for logs exist, bailing out
             QMessageBox.critical(None, "No path to Logs", "No logs found at: " + chatLogDirectory, "Quit")
@@ -99,7 +110,7 @@ class Application(QApplication):
         logLevel = vintelCache.getFromCache("logging_level")
         if not logLevel:
             logLevel = logging.WARN
-        # logLevel = logging.INFO #For Testing
+        logLevel = logging.INFO #For Testing
         backGroundColor = vintelCache.getFromCache("background_color")
         if backGroundColor:
             self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)

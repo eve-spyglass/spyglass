@@ -223,7 +223,6 @@ class Map(object):
             bridge.decompose()
         jumps = soup.select("#jumps")[0]
         colorCount = 0
-
         for bridge in jumpbridgesData:
             sys1 = bridge[0]
             connection = bridge[1]
@@ -242,9 +241,8 @@ class Map(object):
             systemOneOffsetPoint = systemOne.getTransformOffsetPoint()
             systemTwoOffsetPoint = systemTwo.getTransformOffsetPoint()
 
-            systemOne.setJumpbridgeColor(jbColor)
-            systemTwo.setJumpbridgeColor(jbColor)
-
+            # systemOne.setJumpbridgeColor(jbColor)
+            # systemTwo.setJumpbridgeColor(jbColor)
             # Construct the line, color it and add it to the jumps
             line = soup.new_tag("line", x1=systemOneCoords["center_x"] + systemOneOffsetPoint[0],
                                 y1=systemOneCoords["center_y"] + systemOneOffsetPoint[1],
