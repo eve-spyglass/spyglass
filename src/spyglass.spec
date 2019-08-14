@@ -5,7 +5,7 @@ app_name = 'spyglass'
 block_cipher = None
 
 a = Analysis(['spyglass.py'],
-             pathex=['C:\\Users\\Michael\\PycharmProjects\\spyglass\\src' if sys.platform == 'win32' else '/home/michael/spyglass/src'],
+             pathex=['C:\\spyglass\\spyglass\\src' if sys.platform == 'win32' else '/home/crypta/spyglass/src'],
              binaries=None,
              datas=None,
              hiddenimports=[],
