@@ -20,22 +20,13 @@
 import sqlite3
 import threading
 import time
-import six
 
-if six.PY2:
-    def to_blob(x):
-        return buffer(str(x))
+def to_blob(x):
+    return x
 
 
-    def from_blob(x):
-        return str(x[0][0])
-else:
-    def to_blob(x):
-        return x
-
-
-    def from_blob(x):
-        return x
+def from_blob(x):
+    return x
 
 import logging
 from vi.cache.dbstructure import updateDatabase

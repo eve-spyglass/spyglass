@@ -22,8 +22,10 @@ import stat
 import time
 import logging
 
-from PyQt4 import QtCore
-from PyQt4.QtCore import SIGNAL
+from PyQt5 import QtCore
+
+# from PyQt5.QtCore import SIGNAL
+from PyQt5.QtCore import pyqtSignal
 
 """
 There is a problem with the QFIleWatcher on Windows and the log
@@ -41,6 +43,9 @@ DEFAULT_MAX_AGE = 60 * 60 * 24
 
 
 class FileWatcher(QtCore.QThread):
+
+    file_change = pyqtSignal(str, name="file_change")
+
     def __init__(self, path, maxAge=DEFAULT_MAX_AGE):
         QtCore.QThread.__init__(self)
         self.path = path
@@ -68,7 +73,7 @@ class FileWatcher(QtCore.QThread):
                 if not stat.S_ISREG(pathStat.st_mode):
                     continue
                 if modified < pathStat.st_size:
-                    self.emit(SIGNAL("file_change"), path)
+                    self.file_change.emit(path)
                 self.files[path] = pathStat.st_size
 
     def quit(self):

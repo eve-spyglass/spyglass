@@ -20,13 +20,12 @@
 import time
 import datetime
 import logging
-import six
-import pyttsx
+import pyttsx3
 import threading
 
-from Queue import Queue
-from six.moves import queue
-from PyQt4.QtCore import QThread, SIGNAL, QTimer
+from queue import Queue
+import queue
+from PyQt5.QtCore import QThread, QTimer, pyqtSignal
 from vi import evegate
 from vi import koschecker
 from vi import states
@@ -37,6 +36,9 @@ STATISTICS_UPDATE_INTERVAL_MSECS = 1 * 60 * 1000
 
 
 class AvatarFindThread(QThread):
+
+    avatar_update = pyqtSignal(object, object)
+
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue()
@@ -83,7 +85,7 @@ class AvatarFindThread(QThread):
                         cache.putAvatar(charname, avatar)
                 if avatar:
                     logging.debug("AvatarFindThread emit avatar_update for %s" % charname)
-                    self.emit(SIGNAL("avatar_update"), chatEntry, avatar)
+                    self.avatar_update.emit(chatEntry, avatar)
             except Exception as e:
                 logging.error("Error in AvatarFindThread : %s", e)
 
@@ -94,6 +96,9 @@ class AvatarFindThread(QThread):
 
 
 class KOSCheckerThread(QThread):
+
+    kos_result = pyqtSignal(str, str, object, bool)
+
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue()
@@ -141,7 +146,7 @@ class KOSCheckerThread(QThread):
             logging.info(
                     "KOSCheckerThread emitting kos_result for: state = {0}, text = {1}, requestType = {2}, hasKos = {3}".format(
                             "ok", text, requestType, hasKos))
-            self.emit(SIGNAL("kos_result"), "ok", text, requestType, hasKos)
+            self.kos_result.emit("ok", text, requestType, hasKos)
 
     def quit(self):
         self.active = False
@@ -150,6 +155,9 @@ class KOSCheckerThread(QThread):
 
 
 class MapStatisticsThread(QThread):
+
+    statistic_data_update = pyqtSignal(dict)
+
     def __init__(self):
         QThread.__init__(self)
         self.queue = queue.Queue(maxsize=1)
@@ -163,7 +171,8 @@ class MapStatisticsThread(QThread):
 
     def run(self):
         self.refreshTimer = QTimer()
-        self.connect(self.refreshTimer, SIGNAL("timeout()"), self.requestStatistics)
+        # self.connect(self.refreshTimer, SIGNAL("timeout()"), self.requestStatistics)
+        self.refreshTimer.timeout.connect(self.requestStatistics)
         while True:
             # Block waiting for requestStatistics() to enqueue a token
             self.queue.get()
@@ -177,10 +186,11 @@ class MapStatisticsThread(QThread):
                 requestData = {"result": "ok", "statistics": statistics}
             except Exception as e:
                 logging.error("Error in MapStatisticsThread: %s", e)
-                requestData = {"result": "error", "text": six.text_type(e)}
+                requestData = {"result": "error", "text": str(e)}
             self.lastStatisticsUpdate = time.time()
             self.refreshTimer.start(self.pollRate)
-            self.emit(SIGNAL("statistic_data_update"), requestData)
+            # self.emit(SIGNAL("statistic_data_update"), requestData)
+            self.statistic_data_update.emit(requestData)
             logging.debug("MapStatisticsThread emitted statistic_data_update")
 
     def quit(self):
@@ -192,7 +202,7 @@ class MapStatisticsThread(QThread):
 class VoiceOverThread(threading.Thread):
     def __init__(self):
         super(VoiceOverThread, self).__init__()
-        self.engine = pyttsx.init()
+        self.engine = pyttsx3.init()
         self.engine.setProperty('rate', 185)
         self.engine.setProperty('voice', 'english-us')
         self.queue = Queue()
@@ -208,7 +218,7 @@ class VoiceOverThread(threading.Thread):
                 # Will block until it gets a something or times out
                 words = self.queue.get(True, 1)
                 # Init every time, only takes ~20us on slow machines and avoids colliding words
-                self.engine = pyttsx.init()
+                self.engine = pyttsx3.init()
                 self.engine.setProperty('rate', 160)
                 self.engine.setProperty('voice', 'english-us')
                 self.engine.say(words)

@@ -23,13 +23,11 @@ import sys
 import re
 import requests
 import time
-import six
 
 from collections import namedtuple
-from PyQt4.QtCore import QThread
+from PyQt5.QtCore import QThread
 from .resources import resourcePath
-from six.moves import queue
-
+import queue
 import logging
 from vi.singleton import Singleton
 
@@ -44,7 +42,7 @@ except ImportError:
     gPygletAvailable = False
 
 
-class SoundManager(six.with_metaclass(Singleton)):
+class SoundManager(metaclass=Singleton):
     SOUNDS = {"alarm": "178032__zimbot__redalert-klaxon-sttos-recreated.wav",
               "kos": "178031__zimbot__transporterstartbeep0-sttos-recreated.wav",
               "request": "178028__zimbot__bosun-whistle-sttos-recreated.wav"}
@@ -85,6 +83,8 @@ class SoundManager(six.with_metaclass(Singleton)):
     def playSound(self, name="alarm", message="", abbreviatedMessage=""):
         """ Schedules the work, which is picked up by SoundThread.run()
         """
+        if name not in self.SOUNDS:
+            name = "alarm"
         if self.soundAvailable and self.soundActive:
             if self.useSpokenNotifications:
                 audioFile = None

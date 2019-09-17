@@ -5,10 +5,10 @@ app_name = 'spyglass'
 block_cipher = None
 
 a = Analysis(['spyglass.py'],
-             pathex=['C:\\spyglass\\spyglass\\src' if sys.platform == 'win32' else '/home/crypta/spyglass/src'],
+             pathex=['C:\\spyglass1.2\\spyglass_PyQt5\\src', 'venv\\Lib\\site-packages\\PyQt5\\Qt\\bin', 'C:\Windows\System32\downlevel'],
              binaries=None,
              datas=None,
-             hiddenimports=[],
+             hiddenimports=['pyttsx3.drivers', 'pyttsx3.drivers.sapi5'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
@@ -40,6 +40,7 @@ a.datas += [('vi/ui/MainWindow.ui', 'vi/ui/MainWindow.ui', 'DATA'),
             ('vi/ui/res/styles/light.css', 'vi/ui/res/styles/light.css', 'DATA'),
             ('vi/ui/res/styles/light.yaml', 'vi/ui/res/styles/light.yaml', 'DATA'),
             ('docs/jumpbridgeformat.txt', 'docs/jumpbridgeformat.txt', 'DATA'),
+            ('./avbin64.dll', 'lib/avbin64.dll', 'DATA'),
             ]
 
 exe = EXE(pyz,
@@ -48,10 +49,10 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           name=os.path.join('dist', app_name + ('.exe' if sys.platform == 'win32' else '')),
-          debug=False,
+          debug=True,
           strip=False,
           icon='icon.ico',
-          console=False,
+          console=True,
           cipher=block_cipher)
 
 # Build a .app if on OS X

@@ -1,7 +1,4 @@
 import sys
-import six
-if six.PY2:
-    from io import open
 
 PATH = "/home/sparrow/EVE/logs/Chatlogs/TheCitadel_20401229_065150.txt"
 

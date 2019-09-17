@@ -20,14 +20,11 @@
 import datetime
 import json
 import time
-import six
 import requests
 import logging
 
 from bs4 import BeautifulSoup
 from vi.cache.cache import Cache
-from six.moves.urllib.error import HTTPError
-from six.moves.urllib.request import urlopen
 
 ERROR = -1
 NOT_EXISTS = 0
@@ -105,12 +102,12 @@ def idsToNames(ids):
 
     # something allready in the cache?
     for id in ids:
-        cacheKey = u"_".join(("name", "id", six.text_type(id)))
+        cacheKey = u"_".join(("name", "id", str(id)))
         name = cache.getFromCache(cacheKey)
         if name:
             data[id] = name
         else:
-            apiCheckIds.add(six.text_type(id))
+            apiCheckIds.add(str(id))
 
     try:
         # call the EVE-Api for those entries we didn't have in the cache
@@ -123,7 +120,7 @@ def idsToNames(ids):
                 data[row["characterid"]] = row["name"]
             # and writing into cache
             for id in apiCheckIds:
-                cacheKey = u"_".join(("name", "id", six.text_type(id)))
+                cacheKey = u"_".join(("name", "id", str(id)))
                 cache.putIntoCache(cacheKey, data[id], 60 * 60 * 24 * 365)
     except Exception as e:
         logging.error("Exception during idsToNames: %s", e)
@@ -182,7 +179,7 @@ def eveEpoch():
 
 
 def getCharinfoForCharId(charId):
-    cacheKey = u"_".join(("playerinfo_id_", six.text_type(charId)))
+    cacheKey = u"_".join(("playerinfo_id_", str(charId)))
     cache = Cache()
     soup = cache.getFromCache(cacheKey)
     if soup is not None:

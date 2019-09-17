@@ -5,3 +5,5 @@
 src/build/*
 src/dist/*
 .travis.yml
+src/lib/*
+venv/
