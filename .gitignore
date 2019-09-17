@@ -4,5 +4,4 @@
 *.pyproj
 src/build/*
 src/dist/*
-src/lib/*
 venv/
