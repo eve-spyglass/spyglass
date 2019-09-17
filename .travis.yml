@@ -29,12 +29,13 @@ install:
 # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
 # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
 # script: python3 platform-info.py || python platform-info.py
-script: pyinstaller ./spyglass.spec
+script: pyinstaller ./spyglass.spec --name=Spyglass_${TRAVIS_OS_NAME}_${TRAVIS_BRANCH}_${TRAVIS_COMMIT}
 notifications:
   email: false
-addons:
-  artifacts:
-    s3_region: "us-east-2"
-    paths:
-      - dist/*
-    debug: true
+deploy:
+  provider: s3
+  access_key_id: 1
+  secret_access_key:
+  bucket: "spyglass2_builds"
+  skip_cleanup: true
+  upload-dir: dist
