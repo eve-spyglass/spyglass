@@ -38,4 +38,7 @@ deploy:
   secret_access_key:
   bucket: "spyglass2_builds"
   skip_cleanup: true
-  upload-dir: dist
+  local-dir: dist
+  upload-dir: AutoBuilds
+  on:
+    all_branches: true

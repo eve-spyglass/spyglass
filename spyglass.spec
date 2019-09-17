@@ -50,7 +50,7 @@ exe = EXE(pyz,
           name=os.path.join('dist', app_name + ('.exe' if sys.platform == 'win32' else '')),
           debug=True,
           strip=False,
-          icon='icon.ico',
+          icon='src/icon.ico',
           console=True,
           cipher=block_cipher)
 
