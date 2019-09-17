@@ -29,7 +29,7 @@ install:
 # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
 # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
 # script: python3 platform-info.py || python platform-info.py
-script: pwd; ls -lash; pyinstaller ./src/spyglass.spec
+script: pyinstaller ./spyglass.spec
 notifications:
   email: false
 addons:
