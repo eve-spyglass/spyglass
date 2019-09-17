@@ -41,4 +41,4 @@ deploy:
   local-dir: dist
   upload-dir: AutoBuilds
   on:
-    all_branch: true
+    all_branches: true
