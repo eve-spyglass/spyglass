@@ -25,11 +25,10 @@ install:
   - pip3 install pyqt5
   - pip3 install -r src/requirements.txt
   - pip3 install pyinstaller==3.5
-  - cd src
 # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
 # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
 # script: python3 platform-info.py || python platform-info.py
-script: pyinstaller __main__.spec
+script: cd src; pyinstaller __main__.spec
 notifications:
   email: false
 addons:
