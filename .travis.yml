@@ -29,7 +29,7 @@ install:
 # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows
 # 'python3' is a 'command not found' error on Windows but 'py' works on Windows only
 # script: python3 platform-info.py || python platform-info.py
-script: pyinstaller ./spyglass.spec --name=Spyglass_${TRAVIS_OS_NAME}_${TRAVIS_BRANCH}_${TRAVIS_COMMIT}
+script: pyinstaller ./spyglass.spec --name=Spyglass_${TRAVIS_OS_NAME}_${TRAVIS_BRANCH}_${TRAVIS_COMMIT}; ls -lash dist/
 notifications:
   email: false
 deploy:
@@ -41,4 +41,4 @@ deploy:
   local-dir: dist
   upload-dir: AutoBuilds
   on:
-    all_branches: true
+    all_branch: true
