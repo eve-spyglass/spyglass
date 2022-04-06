@@ -22,10 +22,9 @@
 ###########################################################################
 
 import math
-import time
+import datetime
 import requests
 import logging
-
 from bs4 import BeautifulSoup
 from vi import states
 from vi.cache.cache import Cache
@@ -47,8 +46,7 @@ class Map(object):
     """
         The map including all information from dotlan
     """
-
-    DOTLAN_BASIC_URL = u"http://evemaps.dotlan.net/svg/{0}.svg"
+    DOTLAN_BASIC_URL = u"https://evemaps.dotlan.net/svg/{0}.svg"
     styles = Styles()
 
     @property
@@ -56,61 +54,125 @@ class Map(object):
         # Re-render all systems
         for system in self.systems.values():
             system.update()
-        # Update the marker
-        if not self.marker["opacity"] == "0":
-            now = time.time()
-            newValue = (1 - (now - float(self.marker["activated"])) / 10)
-            if newValue < 0:
-                newValue = "0"
-            self.marker["opacity"] = newValue
-        content = str(self.soup)
+
+        # Update the marker, the marker should be visible for 20s
+        if float(self.marker["opacity"]) > 0.0:
+            delta = datetime.datetime.utcnow().timestamp() - float(self.marker["activated"])
+            newOpacity = (1.0-delta/20.0)
+            if newOpacity < 0:
+                newOpacity=0.0
+            self.marker["opacity"] = newOpacity
+        if True:
+            content = str(self.soup)
+        else:
+            content = str(self.soup.select("svg")[0])
         return content
 
-    def __init__(self, region, svgFile=None):
+    def __init__(self, region, svgFile=None, setJumpMapsVisible=False,setSatisticsVisible=False):
         self.region = region
+        self.width = None
+        self.height = None
         cache = Cache()
         self.outdatedCacheError = None
-
+        if self.region == "Providencecatch" or self.region == "Providence-catch-compact":
+            region_to_load = "providence-catch"
+        else:
+            region_to_load = self.region
         # Get map from dotlan if not in the cache
         if not svgFile:
             svg = cache.getFromCache("map_" + self.region)
         else:
             svg = svgFile
-        if not svg:
+        if not svg or svg.startswith("region not found"):
             try:
-                svg = self._getSvgFromDotlan(self.region)
-                cache.putIntoCache("map_" + self.region, svg, evegate.secondsTillDowntime() + 60 * 60)
+                svg = self._getSvgFromDotlan(region_to_load)
+                if not svg or svg.startswith("region not found"):
+                    svg = self._getSvgFromDotlan("providence")
+                cache.putIntoCache("map_" + self.region, svg,
+                                   24 * 60 * 60)  ###evegate.secondsTillDowntime() + ### 60 * 60)
             except Exception as e:
                 self.outdatedCacheError = e
                 svg = cache.getFromCache("map_" + self.region, True)
-                if not svg:
+                if not svg or svg.startswith("region not found"):
                     t = "No Map in cache, nothing from dotlan. Must give up " \
                         "because this happened:\n{0} {1}\n\nThis could be a " \
                         "temporary problem (like dotlan is not reachable), or " \
-                        "everythig went to hell. Sorry. This makes no sense " \
+                        "everything went to hell. Sorry. This makes no sense " \
                         "without the map.\n\nRemember the site for possible " \
                         "updates: https://github.com/Crypta-Eve/spyglass".format(type(e), str(e))
                     raise DotlanException(t)
         # Create soup from the svg
         self.soup = BeautifulSoup(svg, 'html.parser')
-        self.systems = self._extractSystemsFromSoup(self.soup)
+        for scr in self.soup.findAll('script'):
+            scr.extract()
+        for scr in self.soup.select('#controls'):
+            scr.extract()
+        for leg in self.soup.findAll(id="legend"):
+            leg.extract()
+
+        for tag in self.soup.findAll(attrs={"onload": True}):
+            del (tag["onload"])
+
+        if "compact" in self.region:
+            scale = 0.9
+        elif "tactical" in self.region:
+            scale = 1.5
+        else:
+            scale = 1.0
+        self.systems = self._extractSystemsFromSoup(self.soup, scale)
         self.systemsById = {}
         for system in self.systems.values():
             self.systemsById[system.systemId] = system
-        scale = 1
-        if self.region == "Providence-catch": scale = 0.9
-        self._prepareSvg(self.soup, self.systems, scale)
-        self._connectNeighbours()
-        self._jumpMapsVisible = False
-        self._statisticsVisible = False
-        self.marker = self.soup.select("#select_marker")[0]
 
-    def _extractSystemsFromSoup(self, soup):
+        self._extractSizeFromSoup(self.soup)
+        self._prepareSvg(self.soup, self.systems)
+        self._connectNeighbours()
+        self.jumpBridges = []
+        self._jumpMapsVisible = setJumpMapsVisible
+        self._statisticsVisible = setSatisticsVisible
+        self.marker = self.soup.select("#select_marker")[0]
+        self.updateJumpbridgesVisibility()
+        self.updateStatisticsVisibility()
+
+    def setIncursionSystems(self, lst_system_ids):
+        for sys_id, sys in self.systemsById.items():
+            sys.setIncursion(sys_id in lst_system_ids)
+
+    def setCampaignsSystems(self, lst_system_ids):
+        for sys_id, sys in self.systemsById.items():
+            sys.setCampaigns(sys_id in lst_system_ids)
+
+    def _extractSizeFromSoup(self, soup):
+        svg = soup.select("svg")[0]
+        box = svg["viewbox"]
+        if box:
+            box = box.split(" ")
+            self.width = float(box[2])
+            self.height = float(box[3])
+
+        #width = svg["width"]
+        #height = svg["height"]
+
+    def _extractSystemsFromSoup(self, soup, scale):
+        #default size of the systems to calculate the center point
+        svg_width  = 62.5
+        svg_height = 30
         systems = {}
         uses = {}
         for use in soup.select("use"):
             useId = use["xlink:href"][1:]
+            use.attrs["width"] = svg_width
+            use.attrs["height"] = svg_height
+            use.attrs["x"] = str(float(use.attrs["x"]) * scale)
+            use.attrs["y"] = str(float(use.attrs["y"]) * scale)
             uses[useId] = use
+
+        for use in soup.select("line"):
+            use.attrs["x1"] = str((float(use.attrs["x1"])-svg_width/2.0) * scale+svg_width/2.0)
+            use.attrs["y1"] = str((float(use.attrs["y1"])-svg_height/2.0) * scale+svg_height/2.0)
+            use.attrs["x2"] = str((float(use.attrs["x2"])-svg_width/2.0) * scale+svg_width/2.0)
+            use.attrs["y2"] = str((float(use.attrs["y2"])-svg_height/2.0) * scale+svg_height/2.0)
+
         symbols = soup.select("symbol")
         for symbol in symbols:
             symbolId = symbol["id"]
@@ -123,30 +185,141 @@ class Map(object):
                 name = element.select("text")[0].text.strip().upper()
                 mapCoordinates = {}
                 for keyname in ("x", "y", "width", "height"):
-                    mapCoordinates[keyname] = float(uses[symbolId][keyname])
-                mapCoordinates["center_x"] = (mapCoordinates["x"] + (mapCoordinates["width"] / 2))
-                mapCoordinates["center_y"] = (mapCoordinates["y"] + (mapCoordinates["height"] / 2))
+                    try:
+                        mapCoordinates[keyname] = float(uses[symbolId][keyname])
+                    except KeyError:
+                        mapCoordinates[keyname] = 0
+
+                mapCoordinates["center_x"] = (mapCoordinates["x"] + 1.0+56.0/2.0) #(mapCoordinates["width"] / 2.0))
+                mapCoordinates["center_y"] = (mapCoordinates["y"] + (mapCoordinates["height"] / 2.0))
                 try:
-                    transform = uses[symbolId]["transform"]
+                    if symbolId in uses.keys():
+                        keys = uses[symbolId]
+                        if uses[symbolId].find("transform"):
+                            transform = uses[symbolId]["transform"]
+                        else:
+                            transform = None
+                        systems[name] = System(name, element, self.soup, mapCoordinates, transform, systemId)
+                    else:
+                        logging.error("System {} not found.".format(name))
+
                 except KeyError:
-                    transform = "translate(0,0)"
-                systems[name] = System(name, element, self.soup, mapCoordinates, transform, systemId)
+                    logging.critical("Unable to prepare system {}.".format(name))
+                    pass
+
         return systems
 
-    def _prepareSvg(self, soup, systems, scale=1):
+    def _applySystemStatistic(self, systems_stats):
+        for sys_id, sys in self.systemsById.items():
+            sid = str(sys_id)
+            if sid in systems_stats.keys():
+                if "ticker" in systems_stats[sid].keys():
+                    sys.ticker = systems_stats[sid]["ticker"]
+                    sys.setStatus(states.UNKNOWN)
+
+    def _prepareGradients(self, soup):
+
+        grad_located = soup.new_tag("radialGradient", id="grad_located")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#8b008d"
+        stop["stop-opacity"] = "1"
+        grad_located.append(stop)
+        stop = soup.new_tag("stop")
+        stop["offset"] = "100%"
+        stop["stop-color"] = "#8b008d"
+        stop["stop-opacity"] = "0"
+        grad_located.append(stop)
+
+        grad_watch = soup.new_tag("radialGradient", id="grad_watch")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#909090"
+        stop["stop-opacity"] = "1"
+        grad_watch.append(stop)
+        stop = soup.new_tag("stop")
+        stop["offset"] = "100%"
+        stop["stop-color"] = "#909090"
+        stop["stop-opacity"] = "0"
+        grad_watch.append(stop)
+
+
+        grad_camBg = soup.new_tag("radialGradient", id="camBg")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#FF8800"
+        stop["stop-opacity"] = "1"
+        grad_camBg.append(stop)
+        stop = soup.new_tag("stop")
+        stop["offset"] = "100%"
+        stop["stop-color"] = "#FF8800"
+        stop["stop-opacity"] = "0"
+        grad_camBg.append(stop)
+
+        grad_camActiveBg = soup.new_tag("radialGradient", id="camActiveBg")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#ff0000"
+        stop["stop-opacity"] = "1.0"
+        grad_camActiveBg.append(stop)
+        stop2 = soup.new_tag("stop")
+        stop2["offset"] = "100%"
+        stop2["stop-color"] = "#ff0000"
+        stop2["stop-opacity"] = "0.0"
+        grad_camActiveBg.append(stop2)
+
+        grad_incBg = soup.new_tag("radialGradient", id="incBg")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#FFC800"
+        stop["stop-opacity"] = "1"
+        grad_incBg.append(stop)
+        stop = soup.new_tag("stop")
+        stop["offset"] = "100%"
+        stop["stop-color"] = "#FFC800"
+        stop["stop-opacity"] = "0"
+        grad_incBg.append(stop)
+
+        grad_incStBg = soup.new_tag("radialGradient", id="incStBg")
+        stop = soup.new_tag("stop")
+        stop["offset"] = "50%"
+        stop["stop-color"] = "#FFC800"
+        stop["stop-opacity"] = "1"
+        grad_incStBg.append(stop)
+        stop = soup.new_tag("stop")
+        stop["offset"] = "100%"
+        stop["stop-color"] = "#FF0000"
+        stop["stop-opacity"] = "0"
+        grad_incStBg.append(stop)
         svg = soup.select("svg")[0]
+
+        for defs in svg.select("defs"):
+            defs.append(grad_located)
+            defs.append(grad_watch)
+            defs.append(grad_camBg)
+            defs.append(grad_camActiveBg)
+            defs.append(grad_incBg)
+            defs.append(grad_incStBg)
+    #todo:use /sovereignty/campaigns/ and /sovereignty/structures/ and /incursions/ to define system fill
+
+
+
+
+    def _prepareSvg(self, soup, systems):
+        svg = soup.select("svg")[0]
+        svg.attrs = {key: value for key, value in svg.attrs.items() if key not in ["style", "onmousedown", "viewbox"]}
         # Disable dotlan mouse functionality
-        svg["onmousedown"] = "return false;"
-        svg["style"] = "background: {}".format(self.styles.getCommons()["bg_colour"])
+        #css = soup.select("style")[0]
+        #svg["style"] = "background: {}".format(self.styles.getCommons()["bg_colour"])
         if self.styles.getCommons()["change_lines"]:
             for line in soup.select("line"):
                 line["class"] = "j"
-        # Shrink the svg slightly. This is a fix for the compact map only to prevent clipping, but should not adversely affect other maps.
-        soup.select("g")[0]['transform'] = "scale({})".format(scale)
         # Current system marker ellipse
         group = soup.new_tag("g", id="select_marker", opacity="0", activated="0", transform="translate(0, 0)")
         ellipse = soup.new_tag("ellipse", cx="0", cy="0", rx="56", ry="28", style="fill:#462CFF")
         group.append(ellipse)
+
+        self._prepareGradients( soup )
 
         # The giant cross-hairs
         for coord in ((0, -10000), (-10000, 0), (10000, 0), (0, 10000)):
@@ -154,33 +327,35 @@ class Map(object):
             group.append(line)
         svg.insert(0, group)
 
-        # Create jumpbridge markers in a variety of colors
-        for jbColor in JB_COLORS:
-            startPath = soup.new_tag("path", d="M 10 0 L 10 10 L 0 5 z")
-            startMarker = soup.new_tag("marker", viewBox="0 0 20 20", id="arrowstart_{0}".format(jbColor),
-                                       markerUnits="strokeWidth", markerWidth="20", markerHeight="15", refx="-15",
-                                       refy="5", orient="auto", style="stroke:#{0};fill:#{0}".format(jbColor))
-            startMarker.append(startPath)
-            svg.insert(0, startMarker)
-            endpath = soup.new_tag("path", d="M 0 0 L 10 5 L 0 10 z")
-            endmarker = soup.new_tag("marker", viewBox="0 0 20 20", id="arrowend_{0}".format(jbColor),
-                                     markerUnits="strokeWidth", markerWidth="20", markerHeight="15", refx="25",
-                                     refy="5", orient="auto", style="stroke:#{0};fill:#{0}".format(jbColor))
-            endmarker.append(endpath)
-            svg.insert(0, endmarker)
-        jumps = soup.select("#jumps")[0]
+        map = svg.select("#map")
+
+        for defs in svg.select("defs"):
+            for tag in defs.select("a"):
+                tag.attrs = {key: value for key, value in tag.attrs.items() if key not in ["target","xlink:href"]}
+                tag.name = "a"
+
+        for defs in svg.select("defs"):
+            for symbol in defs.select("symbol"):
+                if symbol:
+                    symbol.name = "g"
+                    map.insert(0, symbol)
+        try:
+            jumps = soup.select("#jumps")[0]
+        except Exception as e:
+            jumps = list()
+
 
         # Set up the tags for system statistics
         for systemId, system in self.systemsById.items():
             coords = system.mapCoordinates
             text = "stats n/a"
-            style = "text-anchor:middle;font-size:8;font-weight:normal;font-family:Arial;"
-            svgtext = soup.new_tag("text", x=coords["center_x"], y=coords["y"] + coords["height"] + 6, fill="blue",
+            style = "text-anchor:middle;font-size:7;font-weight:normal;font-family:Arial;"
+            system.svgtext = soup.new_tag("text", x=coords["center_x"], y=coords["y"] + coords["height"] + 4, fill="blue",
                                    style=style, visibility="hidden", transform=system.transform)
-            svgtext["id"] = "stats_" + str(systemId)
-            svgtext["class"] = ["statistics", ]
-            svgtext.string = text
-            jumps.append(svgtext)
+            system.svgtext["id"] = "stats_" + str(systemId)
+            system.svgtext["class"] = "statistics"
+            system.svgtext.string = text
+            jumps.append(system.svgtext)
 
     def _connectNeighbours(self):
         """
@@ -188,8 +363,9 @@ class Map(object):
             It takes a look at all the jumps on the map and gets the system under
             which the line ends
         """
-        for jump in self.soup.select("#jumps")[0].select(".j"):
-            if "jumpbridge" in jump["class"]: continue
+        for jump in self.soup.select("#jumps")[0].select(".j,.jc,.jr"):
+            if "jumpbridge" in jump["class"]:
+                continue
             parts = jump["id"].split("-")
             if parts[0] == "j":
                 startSystem = self.systemsById[int(parts[1])]
@@ -202,25 +378,33 @@ class Map(object):
         return content
 
     def addSystemStatistics(self, statistics):
-        logging.info("addSystemStatistics start")
         if statistics is not None:
             for systemId, system in self.systemsById.items():
-                if systemId in statistics:
+                if systemId in statistics.keys():
                     system.setStatistics(statistics[systemId])
         else:
             for system in self.systemsById.values():
                 system.setStatistics(None)
-        logging.info("addSystemStatistics complete")
 
     def setJumpbridges(self, jumpbridgesData):
         """
             Adding the jumpbridges to the map soup; format of data:
-            tuples with 3 values (sys1, connection, sys2)
+            tuples with at least 3 values (sys1, connection, sys2) connection is <->
         """
+        # todo:disable jbs during init
+        self.jumpBridges = []
+        if jumpbridgesData is None:
+            self.jumpBridges = []
+            return
         soup = self.soup
         for bridge in soup.select(".jumpbridge"):
             bridge.decompose()
-        jumps = soup.select("#jumps")[0]
+        jumps = soup.select("#jumps")
+        if jumps!=None:
+            jumps = soup.select("#jumps")[0]
+        else:
+            return
+
         colorCount = 0
         for bridge in jumpbridgesData:
             sys1 = bridge[0]
@@ -235,6 +419,7 @@ class Map(object):
             colorCount += 1
             systemOne = self.systems[sys1]
             systemTwo = self.systems[sys2]
+            self.jumpBridges.append([systemOne.systemId,systemTwo.systemId])
             systemOneCoords = systemOne.mapCoordinates
             systemTwoCoords = systemTwo.mapCoordinates
             systemOneOffsetPoint = systemOne.getTransformOffsetPoint()
@@ -243,11 +428,30 @@ class Map(object):
             # systemOne.setJumpbridgeColor(jbColor)
             # systemTwo.setJumpbridgeColor(jbColor)
             # Construct the line, color it and add it to the jumps
-            line = soup.new_tag("line", x1=systemOneCoords["center_x"] + systemOneOffsetPoint[0],
-                                y1=systemOneCoords["center_y"] + systemOneOffsetPoint[1],
-                                x2=systemTwoCoords["center_x"] + systemTwoOffsetPoint[0],
-                                y2=systemTwoCoords["center_y"] + systemTwoOffsetPoint[1], visibility="hidden",
-                                style="stroke:#{0}".format(jbColor))
+            if False:
+                x1 = systemOneCoords["center_x"] + systemOneOffsetPoint[0]
+                y1 = systemOneCoords["center_y"] + systemOneOffsetPoint[1]
+                x2 = systemTwoCoords["center_x"] + systemTwoOffsetPoint[0]
+                y2 = systemTwoCoords["center_y"] + systemTwoOffsetPoint[1]
+                dx = (x2 - x1) / 2.0
+                dy = (y2 - y1) / 2.0
+                offset = 0.4 * math.sqrt( dx*dx+dy*dy)
+                angle = math.atan2(dy, dx) - math.pi / 2.0
+                mx = x1 + dx + offset * math.cos(angle)
+                my = y1 + dy + offset * math.sin(angle)
+
+                line = soup.new_tag( "path",d="M{} {} Q {} {} {} {}".format(x1,y1,mx,my,x2,y2),
+                                        visibility = "hidden",
+                                        fill="transparent",
+                                        style="stroke:#{0}".format(jbColor))
+
+            else:
+                line = soup.new_tag("line", x1=systemOneCoords["center_x"] + systemOneOffsetPoint[0],
+                                        y1=systemOneCoords["center_y"] + systemOneOffsetPoint[1],
+                                        x2=systemTwoCoords["center_x"] + systemTwoOffsetPoint[0],
+                                        y2=systemTwoCoords["center_y"] + systemTwoOffsetPoint[1],
+                                        visibility="hidden",
+                                        style="stroke:#{0}".format(jbColor))
             line["stroke-width"] = 2
             line["class"] = ["jumpbridge", ]
             if "<" in connection:
@@ -255,35 +459,28 @@ class Map(object):
             if ">" in connection:
                 line["marker-end"] = "url(#arrowend_{0})".format(jbColor)
             jumps.insert(0, line)
+        self.updateJumpbridgesVisibility()
 
-    def changeStatisticsVisibility(self):
-        newStatus = False if self._statisticsVisible else True
-        value = "visible" if newStatus else "hidden"
+    def updateStatisticsVisibility(self):
+        value = "visible" if self._statisticsVisible else "hidden"
         for line in self.soup.select(".statistics"):
             line["visibility"] = value
             line["fill"] = "red"
-        self._statisticsVisible = newStatus
 
-        return newStatus
+    def changeStatisticsVisibility(self):
+        self._statisticsVisible = False if self._statisticsVisible else True
+        self.updateStatisticsVisibility()
+        return self._statisticsVisible
 
-    def changeJumpbridgesVisibility(self):
-        newStatus = False if self._jumpMapsVisible else True
-        value = "visible" if newStatus else "hidden"
+    def updateJumpbridgesVisibility(self):
+        value = "visible" if self._jumpMapsVisible else "hidden"
         for line in self.soup.select(".jumpbridge"):
             line["visibility"] = value
-        self._jumpMapsVisible = newStatus
-        # self.debugWriteSoup()
-        return newStatus
 
-    def debugWriteSoup(self):
-        svgData = self.soup.prettify("utf-8")
-        try:
-            with open("/home/michael/Desktop/output.svg", "wb") as svgFile:
-                svgFile.write(svgData)
-                svgFile.close()
-        except Exception as e:
-            logging.error(e)
-
+    def changeJumpbridgesVisibility(self):
+        self._jumpMapsVisible = False if self._jumpMapsVisible else True
+        self.updateJumpbridgesVisibility()
+        return self._jumpMapsVisible
 
 class System(object):
     """
@@ -292,18 +489,30 @@ class System(object):
 
     styles = Styles()
     textInv = TextInverter()
+    SYSTEM_STYLE = "font-family: Arial, Helvetica, sans-serif; font-size: 8px; fill: {};"
+    ALARM_STYLE = "font-family: Arial, Helvetica, sans-serif; font-size: 7px; fill: {};"
 
-    ALARM_COLORS = [(60 * 4, "#FF0000", "#FFFFFF"), (60 * 10, "#FF9B0F", "#FFFFFF"), (60 * 15, "#FFFA0F", "#000000"),
-                    (60 * 25, "#FFFDA2", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
-    CLEAR_COLORS = [(60 * 4, "#00FF00", "#000000"), (60 * 10, "#80FF80", "#000000"), (60 * 15, "#80FF80", "#000000"),
-                    (60 * 25, "#C0FFC0", "#000000"), (60 * 60 * 24, "#FFFFFF", "#000000")]
+    ALARM_BASE_T = 60 #set 1 for testing
+    ALARM_COLORS = [(ALARM_BASE_T * 5,  "#FF0000", "#FFFFFF"),
+                    (ALARM_BASE_T * 10, "#FF9B0F", "#FFFFFF"),
+                    (ALARM_BASE_T * 15, "#FFFA0F", "#000000"),
+                    (ALARM_BASE_T * 20, "#FFFDA2", "#000000"),
+                    (0,       "#FFFFFF", "#000000")]
+
+    CLEAR_COLORS = [(ALARM_BASE_T * 5,  "#00FF00", "#000000"),
+                    (ALARM_BASE_T * 10, "#40FF40", "#000000"),
+                    (ALARM_BASE_T * 15, "#80FF80", "#000000"),
+                    (ALARM_BASE_T * 20, "#C0FFC0", "#000000"),
+                    (0,       "#FFFFFF", "#000000")]
+
     ALARM_COLOR = ALARM_COLORS[0][1]
     UNKNOWN_COLOR = styles.getCommons()["unknown_colour"]
     CLEAR_COLOR = CLEAR_COLORS[0][1]
 
-    def __init__(self, name, svgElement, mapSoup, mapCoordinates, transform, systemId):
+    def __init__(self, name, svgElement, mapSoup, mapCoordinates, transform, systemId, ticker="npc"):
         self.status = states.UNKNOWN
         self.name = name
+        self.ticker = ticker
         self.svgElement = svgElement
         self.mapSoup = mapSoup
         self.origSvgElement = svgElement
@@ -311,18 +520,22 @@ class System(object):
         self.firstLine = svgElement.select("text")[0]
         self.secondLine = svgElement.select("text")[1]
         self.lastAlarmTime = 0
+        self.lastAlarmTimestamp = 0
         self.messages = []
         self.setStatus(states.UNKNOWN)
         self.__locatedCharacters = []
         self.backgroundColor = self.styles.getCommons()["bg_colour"]
         self.mapCoordinates = mapCoordinates
         self.systemId = systemId
-        self.transform = transform
+        self.transform = "translate(0, 0)" if transform is None else transform
         self.cachedOffsetPoint = None
         self._neighbours = set()
         self.statistics = {"jumps": "?", "shipkills": "?", "factionkills": "?", "podkills": "?"}
         self.currentStyle = ""
-
+        self.__hasCampaigns = False
+        self.__hasIncursion = False
+        self.__hasIncursionBoss = False
+        self.svgtext = None
     def getTransformOffsetPoint(self):
         if not self.cachedOffsetPoint:
             if self.transform:
@@ -335,7 +548,7 @@ class System(object):
 
     def setJumpbridgeColor(self, color):
         idName = self.name + u"_jb_marker"
-        for element in self.mapSoup.select(u"#" + idName):
+        for element in self.mapSoup.select("#" + idName):
             element.decompose()
         coords = self.mapCoordinates
         offsetPoint = self.getTransformOffsetPoint()
@@ -348,14 +561,14 @@ class System(object):
         jumps = self.mapSoup.select("#jumps")[0]
         jumps.insert(0, tag)
 
-    def mark(self, timeA):
+    def mark(self):
         marker = self.mapSoup.select("#select_marker")[0]
         offsetPoint = self.getTransformOffsetPoint()
         x = self.mapCoordinates["center_x"] + offsetPoint[0]
         y = self.mapCoordinates["center_y"] + offsetPoint[1]
         marker["transform"] = "translate({x},{y})".format(x=x, y=y)
-        marker["opacity"] = "1"
-        marker["activated"] = timeA
+        marker["opacity"] = 1.0
+        marker["activated"] = datetime.datetime.utcnow().timestamp()
 
     def addLocatedCharacter(self, charname):
         idName = self.name + u"_loc"
@@ -364,11 +577,45 @@ class System(object):
             self.__locatedCharacters.append(charname)
         if not wasLocated:
             coords = self.mapCoordinates
-            newTag = self.mapSoup.new_tag("ellipse", cx=coords["center_x"] - 2.5, cy=coords["center_y"], id=idName,
-                                          rx=coords["width"] / 2 + 4, ry=coords["height"] / 2 + 4, style="fill:#8b008d",
-                                          transform=self.transform)
+            newTag = self.mapSoup.new_tag("rect", x=coords["x"]-10, y=coords["y"]-8,
+                                          width=coords["width"]+16, height=coords["height"]+16, id=idName,
+                                          rx=12, ry=12, fill="url(#grad_located)")
             jumps = self.mapSoup.select("#jumps")[0]
             jumps.insert(0, newTag)
+
+    def setCampaigns(self, campaigns: bool):
+        id_name = self.name + u"_campaigns"
+        if campaigns and not self.__hasCampaigns:
+            camp_node = self.mapSoup.find(id=id_name)
+            if camp_node is None:
+                coords = self.mapCoordinates
+                new_tag = self.mapSoup.new_tag("rect", x=coords["x"]-10, y=coords["y"]-8,
+                                          width=coords["width"]+16, height=coords["height"]+16, id=id_name,
+                                          rx=12, ry=12, fill="url(#camActiveBg)")
+                jumps = self.mapSoup.select("#jumps")[0]
+                jumps.insert(0, new_tag)
+        elif not campaigns and self.__hasCampaigns:
+            camp_node = self.mapSoup.find(id=id_name)
+            camp_node.decompose()
+
+    def setIncursion(self, incursion: bool, hasBoss=False):
+        id_name = self.name + u"_incursion"
+        if incursion and not self.__hasIncursion:
+            curr_node = self.mapSoup.find(id=id_name)
+            if curr_node is None:
+                coords = self.mapCoordinates
+                new_tag = self.mapSoup.new_tag("rect", x=coords["x"]-10, y=coords["y"]-8,
+                                          width=coords["width"]+16, height=coords["height"]+16, id=id_name,
+                                          rx=12, ry=12, fill="url(#incStBg)" if hasBoss else "url(#incBg)")
+                jumps = self.mapSoup.select("#jumps")[0]
+                jumps.insert(0, new_tag)
+        elif not incursion and self.__hasIncursion:
+            camp_node = self.mapSoup.find(id=id_name)
+            camp_node.decompose()
+        self.__hasIncursion = incursion
+        self.__hasIncursionBoss = hasBoss
+
+
 
     def setBackgroundColor(self, color):
         for rect in self.svgElement("rect"):
@@ -384,12 +631,17 @@ class System(object):
 
     def removeLocatedCharacter(self, charname):
         idName = self.name + u"_loc"
-
         if charname in self.__locatedCharacters:
             self.__locatedCharacters.remove(charname)
             if not self.__locatedCharacters:
-                for element in self.mapSoup.select("#" + idName):
-                    element.decompose()
+                try:
+                    elem = self.mapSoup.find(id=idName)
+                    if elem is not None:
+                        logging.debug("removeLocatedCharacter {0} Decompose {1}".format(charname, str(elem)))
+                        elem.decompose()
+                except Exception as e:
+                    logging.critical("Error in removeLocatedCharacter  {0}".format(str(e)))
+                    pass
 
     def addNeighbour(self, neighbourSystem):
         """
@@ -410,6 +662,7 @@ class System(object):
             example:
             {sys3: {"distance"}: 0, sys2: {"distance"}: 1}
         """
+        #todo:change distance calculaten to esi to enable detection of
         systems = {self: {"distance": 0}}
         currentDistance = 0
         while currentDistance < distance:
@@ -432,47 +685,41 @@ class System(object):
         if self in system._neighbours:
             system._neigbours.remove(self)
 
-    def setStatus(self, newStatus):
+    def setStatus(self, newStatus, alarm_time=datetime.datetime.utcnow()):
         if newStatus == states.ALARM:
-            self.lastAlarmTime = time.time()
+            self.lastAlarmTimestamp = alarm_time.timestamp()
             if "stopwatch" not in self.secondLine["class"]:
                 self.secondLine["class"].append("stopwatch")
             self.setBackgroundColor(self.ALARM_COLOR)
-            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-            self.secondLine["alarmtime"] = self.lastAlarmTime
-            self.secondLine["style"] = "fill: {};".format(
-                self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.firstLine["style"] = self.SYSTEM_STYLE.format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = self.ALARM_STYLE.format(
+            self.textInv.getTextColourFromBackground(self.backgroundColor))
         elif newStatus == states.CLEAR:
-            self.lastAlarmTime = time.time()
+            self.lastAlarmTimestamp = alarm_time.timestamp()
             self.setBackgroundColor(self.CLEAR_COLOR)
-            self.secondLine["alarmtime"] = 0
             if "stopwatch" not in self.secondLine["class"]:
                 self.secondLine["class"].append("stopwatch")
-            self.secondLine["alarmtime"] = self.lastAlarmTime
-            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-            self.secondLine["style"] = "fill: {};".format(
-                self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.firstLine["style"] = self.SYSTEM_STYLE.format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = self.ALARM_STYLE.format(self.textInv.getTextColourFromBackground(self.backgroundColor))
             self.secondLine.string = "clear"
-        elif newStatus == states.WAS_ALARMED:
-            self.setBackgroundColor(self.UNKNOWN_COLOR)
-            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-            self.secondLine["style"] = "fill: #000000;"
         elif newStatus == states.UNKNOWN:
             self.setBackgroundColor(self.UNKNOWN_COLOR)
             # second line in the rects is reserved for the clock
-            self.secondLine.string = "?"
-        #            self.firstLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
-        #            self.secondLine["style"] = "fill: {};".format(self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine.string = self.ticker
+            self.firstLine["style"] = self.SYSTEM_STYLE.format(
+                self.textInv.getTextColourFromBackground(self.backgroundColor))
+            self.secondLine["style"] = self.ALARM_STYLE.format(
+                self.textInv.getTextColourFromBackground(self.backgroundColor))
         if newStatus not in (states.NOT_CHANGE, states.REQUEST):  # unknown not affect system status
             self.status = newStatus
 
     def setStatistics(self, statistics):
-        if statistics is None:
-            text = "stats n/a"
-        else:
-            text = "j-{jumps} f-{factionkills} s-{shipkills} p-{podkills}".format(**statistics)
-        svgtext = self.mapSoup.select("#stats_" + str(self.systemId))[0]
-        svgtext.string = text
+        if self.svgtext is not None:
+            if statistics is None:
+                self.svgtext.string = "stats n/a"
+            else:
+                self.svgtext.string = "j-{jumps} f-{factionkills} s-{shipkills} p-{podkills}".format(**statistics)
+
 
     def update(self):
         # state changed?
@@ -480,45 +727,51 @@ class System(object):
         # self.firstLine["style"] = "fill: #FFFFFF" #System name
         # self.secondLine["style"] = "fill: #FFFFFF" #Timer / ?
 
+        last_cycle = True
         if (self.currentStyle is not self.styles.currentStyle):
             self.currentStyle = self.styles.currentStyle
             self.updateStyle()
 
-        if (self.status == states.ALARM):
-            alarmTime = time.time() - self.lastAlarmTime
+        alarmTime = datetime.datetime.utcnow().timestamp() - self.lastAlarmTimestamp
+        if self.status == states.ALARM:
             for maxDiff, alarmColour, lineColour in self.ALARM_COLORS:
                 if alarmTime < maxDiff:
                     if self.backgroundColor != alarmColour:
                         self.backgroundColor = alarmColour
                         for rect in self.svgElement("rect"):
                             if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
-                                rect["style"] = "fill: {0};".format(self.backgroundColor)
-                        lineColour = self.textInv.getTextColourFromBackground(alarmColour)
-                        self.firstLine["style"] = "fill: {}".format(lineColour)
-                        self.secondLine["style"] = "fill: {};".format(lineColour)
+                                rect["style"] = self.SYSTEM_STYLE.format(self.backgroundColor)
+                        self.updateLineColour()
+                    last_cycle = False
                     break
-        if self.status in (states.ALARM, states.WAS_ALARMED, states.CLEAR):  # timer
-            diff = math.floor(time.time() - self.lastAlarmTime)
-            minutes = int(math.floor(diff / 60))
-            seconds = int(diff - minutes * 60)
-            string = "{m:02d}:{s:02d}".format(m=minutes, s=seconds)
-            if self.status == states.CLEAR:
-                for maxDiff, clearColour, lineColour in self.CLEAR_COLORS:
-                    if maxDiff < diff:
-                        if self.backgroundColor != clearColour:
-                            self.backgroundColor = clearColour
-                            for rect in self.svgElement("rect"):
-                                if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
-                                    rect["style"] = "fill: {0};".format(self.backgroundColor)
-                            self.updateLineColour()
-                string = "clr: {m:02d}:{s:02d}".format(m=minutes, s=seconds)
-            self.secondLine.string = string
+        elif self.status == states.CLEAR:
+            for maxDiff, clearColour, lineColour in self.CLEAR_COLORS:
+                if alarmTime < maxDiff:
+                    if self.backgroundColor != clearColour:
+                        self.backgroundColor = clearColour
+                        for rect in self.svgElement("rect"):
+                            if "location" not in rect.get("class", []) and "marked" not in rect.get("class", []):
+                                rect["style"] = self.SYSTEM_STYLE.format(self.backgroundColor)
+                        self.updateLineColour()
+                    last_cycle = False
+                    break
+
+        if self.status in (states.ALARM, states.CLEAR):
+            if last_cycle:
+                self.status = states.UNKNOWN
+                self.setBackgroundColor(self.UNKNOWN_COLOR)
+                self.updateLineColour()
+
+            minutes = int(math.floor(alarmTime / 60))
+            seconds = int(alarmTime - minutes * 60)
+
+            self.secondLine.string = "{m:02d}:{s:02d}".format(m=minutes, s=seconds, ticker=self.ticker)
             # print self.backgroundColor, self.name, self.status
 
     def updateLineColour(self):
         lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
-        self.firstLine["style"] = "fill: {}".format(lineColour)
-        self.secondLine["style"] = "fill: {0};".format(lineColour)
+        self.firstLine["style"] = self.SYSTEM_STYLE.format(lineColour)
+        self.secondLine["style"] = self.ALARM_STYLE.format(lineColour)
 
     def updateStyle(self):
         for i in range(5):
@@ -530,8 +783,8 @@ class System(object):
         self.setBackgroundColor(self.UNKNOWN_COLOR)
         self.status = states.UNKNOWN
         lineColour = self.textInv.getTextColourFromBackground(self.backgroundColor)
-        self.firstLine["style"] = "fill: {}".format(lineColour)
-        self.secondLine["style"] = "fill: {0};".format(lineColour)
+        self.firstLine["style"] = self.SYSTEM_STYLE.format(lineColour)
+        self.secondLine["style"] = self.ALARM_STYLE.format(lineColour)
 
 
 def convertRegionName(name):
@@ -560,7 +813,7 @@ def convertRegionName(name):
 
 # this is for testing:
 if __name__ == "__main__":
-    map = Map("Providence", "Providence.svg")
+    map = Map("providence")
     s = map.systems["I7S-1S"]
     s.setStatus(states.ALARM)
     logging.error(map.svg)

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>700</width>
-    <height>560</height>
+    <height>592</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>700</width>
-    <height>558</height>
+    <height>563</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -35,7 +35,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>310</y>
+     <y>340</y>
      <width>651</width>
      <height>221</height>
     </rect>
@@ -743,14 +743,14 @@ Public License instead of this License.  But first, please read
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>260</x>
-     <y>10</y>
-     <width>411</width>
-     <height>231</height>
+     <x>249</x>
+     <y>8</y>
+     <width>421</width>
+     <height>261</height>
     </rect>
    </property>
    <property name="text">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Spyglass&lt;/span&gt; - Visual Intel Chat Analyzer&lt;br/&gt;&lt;br/&gt;Current Dev Team: &lt;a href=&quot;mailto: crypta@crypta.tech&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Crypta Eve&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;Original Dev Team: &lt;a href=&quot;mailto:xanthos.eve@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Xanthos&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;mailto:lightlazer@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Parrion Hukondo&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;mailto:cberg@3wsolutions.se&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;chriz&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;This software is based on original work by Sebastian Meyer &lt;br/&gt;and is open source licensed under GPL v3.&lt;br/&gt;Find original sources and documentation at&lt;br/&gt;&lt;a href=&quot;https://github.com/XanthosX/vintel&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/xanthos-eve/vintel&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Donations of ISK are appreciated.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;NRDS!&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Spyglass&lt;/span&gt; - Visual Intel Chat Analyzer&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;Current Dev Team: &lt;a href=&quot;mailto: crypta@crypta.tech&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Crypta Eve&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Contributors: &lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;jkey-67&lt;/span&gt;&lt;br/&gt;Original Dev Team: &lt;a href=&quot;mailto:xanthos.eve@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Xanthos&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;mailto:lightlazer@gmail.com&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;Parrion Hukondo&lt;/span&gt;&lt;/a&gt;, &lt;a href=&quot;mailto:cberg@3wsolutions.se&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;chriz&lt;/span&gt;&lt;/a&gt;&lt;br/&gt;&lt;br/&gt;This software is based on original work by Sebastian Meyer &lt;br/&gt;and is open source licensed under GPL v3.&lt;br/&gt;Find original sources and documentation at&lt;br/&gt;&lt;a href=&quot;https://github.com/XanthosX/vintel&quot;&gt;&lt;span style=&quot; text-decoration: underline; color:#0000ff;&quot;&gt;https://github.com/xanthos-eve/vintel&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Donations of ISK are appreciated&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignHCenter|Qt::AlignTop</set>

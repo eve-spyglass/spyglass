@@ -41,6 +41,12 @@ def updateDatabase(oldVersion, con):
     if oldVersion < 3:
         queries += ["CREATE TABLE cache (key VARCHAR PRIMARY KEY, data BLOB, modified INT, maxage INT)",
                     "UPDATE version SET version = 3"]
+
+    if oldVersion < 4:
+        queries += ["CREATE TABLE jumpbridge (src VARCHAR PRIMARY KEY, dst VARCHAR, id_src INT, id_dst INT, used INT, modified INT, maxage INT)",
+                    "UPDATE version SET version = 4"]
+
+
     for query in queries:
         con.execute(query)
     for update in databaseUpdates:

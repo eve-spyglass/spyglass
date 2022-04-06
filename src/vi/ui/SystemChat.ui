@@ -153,6 +153,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QPushButton" name="dotlanButton">
+              <property name="text">
+               <string>Open Dotlan</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
          </layout>

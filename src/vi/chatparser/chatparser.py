@@ -20,10 +20,11 @@
 import datetime
 import os
 import time
+import logging
 
 from bs4 import BeautifulSoup
 from vi import states
-from PyQt5.QtWidgets import  QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
 from .parser_functions import parseStatus
 from .parser_functions import parseUrls, parseShips, parseSystems
@@ -36,12 +37,13 @@ class ChatParser(object):
     """ ChatParser will analyze every new line that was found inside the Chatlogs.
     """
 
-    def __init__(self, path, rooms, systems):
+    def __init__(self, path, rooms, systems, inteltime):
         """ path = the path with the logs
             rooms = the rooms to parse"""
         self.path = path  # the path with the chatlog
         self.rooms = rooms  # the rooms to watch (excl. local)
         self.systems = systems  # the known systems as dict name: system
+        self.intelTime = inteltime #20 min intel time
         self.fileData = {}  # informations about the files in the directory
         self.knownMessages = []  # message we allready analyzed
         self.locations = {}  # informations about the location of a char
@@ -57,18 +59,28 @@ class ChatParser(object):
             if currentTime - fileTime < maxDiff:
                 self.addFile(fullPath)
 
+    def roomNameFromFileName(self, filename):
+        # Checking if we must do anything with the changed file.
+        # We only need those which name is in the rooms-list
+        # EvE names the file like room_20210210_223941_1350114619.txt, so we don't need
+        # the last 31 chars
+        noIdStr = filename[:filename.rindex("_")]
+        noTimeStr = noIdStr[:noIdStr.rindex("_")]
+        return noTimeStr[:noTimeStr.rindex("_")]
+          
     def addFile(self, path):
         lines = None
         content = ""
         filename = os.path.basename(path)
-        roomname = filename[:-20]
+        roomname = self.roomNameFromFileName( filename )
         try:
             with open(path, "r", encoding='utf-16-le') as f:
                 content = f.read()
+            logging.info("Add room " + roomname + " to list.")
         except Exception as e:
             self.ignoredPaths.append(path)
             QMessageBox.warning(None, "Read a log file failed!",
-                                "File: {0} - problem: {1}".format(path, str(e)), "OK")
+                                "File: {0} - problem: {1}".format(path, str(e)), QMessageBox.Ok)
             return None
 
         lines = content.split("\n")
@@ -84,7 +96,8 @@ class ChatParser(object):
                     elif "Session started:" in line:
                         sessionStr = line[line.find(":") + 1:].strip()
                         sessionStart = datetime.datetime.strptime(sessionStr, "%Y.%m.%d %H:%M:%S")
-                    if charname and sessionStart:
+
+                    if charname and sessionStart :
                         self.fileData[path]["charname"] = charname
                         self.fileData[path]["sessionstart"] = sessionStart
                         break
@@ -92,6 +105,10 @@ class ChatParser(object):
         return lines
 
     def _lineToMessage(self, line, roomname):
+
+        if roomname not in self.rooms:
+            return None
+
         # finding the timestamp
         timeStart = line.find("[") + 1
         timeEnds = line.find("]")
@@ -100,6 +117,11 @@ class ChatParser(object):
             timestamp = datetime.datetime.strptime(timeStr, "%Y.%m.%d %H:%M:%S")
         except ValueError:
             return None
+
+        if timestamp < datetime.datetime.utcnow()-datetime.timedelta(minutes=self.intelTime):
+            logging.debug("Skip {} Room:{}".format(line.encode('ascii', 'ignore'), roomname.encode('ascii', 'ignore')))
+            return None
+
         # finding the username of the poster
         userEnds = line.find(">")
         username = line[timeEnds + 1:userEnds].strip()
@@ -111,17 +133,6 @@ class ChatParser(object):
         rtext = soup.select("rtext")[0]
         systems = set()
         upperText = text.upper()
-
-        # KOS request
-        if upperText.startswith("XXX "):
-            return Message(roomname, text, timestamp, username, systems, upperText, status=states.KOS_STATUS_REQUEST)
-        elif roomname.startswith("="):
-            return Message(roomname, "xxx " + text, timestamp, username, systems, "XXX " + upperText,
-                           status=states.KOS_STATUS_REQUEST)
-        elif upperText.startswith("VINTELSOUND_TEST"):
-            return Message(roomname, text, timestamp, username, systems, upperText, status=states.SOUND_TEST)
-        if roomname not in self.rooms:
-            return None
 
         message = Message(roomname, "", timestamp, username, systems, text, originalText)
         # May happen if someone plays > 1 account
@@ -177,7 +188,7 @@ class ChatParser(object):
 
         # Finding the pure message
         text = line[userEnds + 1:].strip()  # text will the text to work an
-        if username in ("EVE-System", "EVE System"):
+        if username in ("EVE-System", "EVE System" ):
             if ":" in text:
                 system = text.split(":")[1].strip().replace("*", "").upper()
                 status = states.LOCATION
@@ -191,23 +202,19 @@ class ChatParser(object):
                 message = Message("", "", timestamp, charname, [system, ], "", "", status)
         return message
 
-    def fileModified(self, path, rescan=False):
+    def fileModified(self, path, rescan=False ):
         messages = []
         if path in self.ignoredPaths:
             return []
-        # Checking if we must do anything with the changed file.
-        # We only need those which name is in the rooms-list
-        # EvE names the file like room_20140913_200737.txt, so we don't need
-        # the last 20 chars
         filename = os.path.basename(path)
-        roomname = filename[:-20]
+        roomname = self.roomNameFromFileName( filename )
         if path not in self.fileData:
             # seems eve created a new file. New Files have 12 lines header
             self.fileData[path] = {"lines": 13}
-        if not rescan:
-            oldLength = self.fileData[path]["lines"]
-        else:
+        if rescan:
             oldLength = 13
+        else:
+            oldLength = self.fileData[path]["lines"]
         lines = self.addFile(path)
         if path in self.ignoredPaths:
             return []
@@ -218,7 +225,7 @@ class ChatParser(object):
                 if roomname in LOCAL_NAMES:
                     message = self._parseLocal(path, line)
                 else:
-                    message = self._lineToMessage(line, roomname)
+                    message = self._lineToMessage(line, roomname )
                 if message:
                     messages.append(message)
         return messages

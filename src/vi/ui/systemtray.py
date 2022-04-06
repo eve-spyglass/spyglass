@@ -18,19 +18,17 @@
 ###########################################################################
 
 import time
+import os
+import logging
 
-# import range
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import  QAction, QActionGroup
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QAction, QActionGroup
 from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import  QSystemTrayIcon
-
+from PyQt5.QtWidgets import QSystemTrayIcon
 from vi.resources import resourcePath
 from vi import states
 from vi.soundmanager import SoundManager
-# from PyQt5.QtCore import SIGNAL
-
 
 class TrayContextMenu(QtWidgets.QMenu):
     instances = set()
@@ -42,6 +40,12 @@ class TrayContextMenu(QtWidgets.QMenu):
         TrayContextMenu.instances.add(self)
         self.trayIcon = trayIcon
         self._buildMenu()
+
+    def hasJumpGate(sys_name=None) -> bool:
+        return False
+
+    def updateMenu(self, sys_name=None, rgn_name=None):
+        pass
 
     def _buildMenu(self):
         self.framelessCheck = QtWidgets.QAction("Frameless Window", self, checkable=True)
@@ -83,12 +87,12 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
     # Min seconds between two notifications
     MIN_WAIT_NOTIFICATION = 15
 
-    alarm_distance = pyqtSignal()
+    alarm_distance = pyqtSignal(int)
     change_frameless = pyqtSignal()
     quit_signal = pyqtSignal()
 
     def __init__(self, app):
-        self.icon = QIcon(resourcePath("vi/ui/res/logo_small.png"))
+        self.icon = QIcon(resourcePath(os.path.join("vi", "ui", "res", "logo_small.png")))
         QSystemTrayIcon.__init__(self, self.icon, app)
         self.setToolTip("Your Spyglass Information Service! :)")
         self.lastNotifications = {}
@@ -110,7 +114,7 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         return self.contextMenu().distanceGroup
 
     def quit(self):
-        self.quit.emit()
+        self.quit_signal.emit()
 
     def switchAlarm(self):
         newValue = not self.showAlarm
@@ -125,6 +129,7 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         self.showRequest = newValue
 
     def showNotification(self, message, system, char, distance):
+        logging.debug("shownotification")
         if message is None:
             return
         room = message.room
@@ -132,12 +137,14 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
         text = None
         icon = None
         text = ""
+
         if (message.status == states.ALARM and self.showAlarm and self.lastNotifications.get(states.ALARM,
                                                                                              0) < time.time() - self.MIN_WAIT_NOTIFICATION):
             title = "ALARM!"
             icon = 2
             speechText = (u"{0} alarmed in {1}, {2} jumps from {3}".format(system, room, distance, char))
             text = speechText + (u"\nText: %s" % text)
+            logging.debug("playing alarm sound!")
             SoundManager().playSound("alarm", text, speechText)
             self.lastNotifications[states.ALARM] = time.time()
         elif (message.status == states.REQUEST and self.showRequest and self.lastNotifications.get(states.REQUEST,
@@ -146,7 +153,7 @@ class TrayIcon(QtWidgets.QSystemTrayIcon):
             icon = 1
             text = (u"Someone is requesting status of {0} in {1}.".format(system, room))
             self.lastNotifications[states.REQUEST] = time.time()
-            SoundManager().playSound("request", text)
+            #SoundManager().playSound("request", text)
         if not (title is None or text is None or icon):
             text = text.format(**locals())
             self.showMessage(title, text, icon)

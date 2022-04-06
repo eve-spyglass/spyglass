@@ -1,5 +1,5 @@
-The jumpbridge file can be accessed either from the internet by specifying  URL;
-or by pointing to a local file.
+The jumpbridge file can be accessed either from the internet by specifying a URL;
+or by pointing to a local file
 
 How to format the data for the jumpbridges:
 
@@ -12,21 +12,15 @@ the second system. Between the three parts there has to be a space.
 The connection is a line (minus) in the middle and possible arrows (sign for
 greater or lower) at the ends. If there is such a sign, an arrow will be
 drawn on the map.
+If selected, all jumpbridges will be drawn on map as bezier lines in different shades fo green.
 
 Examples:
 
 System1 <-> System2
-System3 <- System4
-System5 - System6
+System1 » System1
 
-The first line will draw a jumpbridge between System1 and System2 with an 
-arrow on both sides.
-The second line will draw a jumpbridge between System3 and System4, but only
-the side to Syste3 will have an arrow pointing on the system (could be helpfull
-for "oneway"-jumpbridges).
-The last line draws a line between System5 and System 6 and no arrows at the 
-endpoints.
+The first line will draw a jumpbridge between System1 and System2 with an
+arrow on both sides, the second line is an example which may be copied directly from inside the eve client.
 
-Write the systemnames as they are written in the maps.
-Don't forget the space between the Systemnames and the jumpbridge!
-
+Write the system names exactly as they are written in the maps.
+Don't forget the space in between the system names and the jumpbridge!

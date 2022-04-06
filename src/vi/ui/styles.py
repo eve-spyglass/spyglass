@@ -19,6 +19,7 @@
 
 import logging
 import yaml
+import os
 
 from vi.resources import resourcePath
 
@@ -35,20 +36,23 @@ class Styles:
     currentStyle = "light"
 
     def __init__(self):
+        try:
+            # default theme
+            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "light.css"))) as default:
+                Styles.defaultStyle = default.read()
+            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "light.yaml"))) as default:
+                Styles.defaultCommons = yaml.full_load(default)
+            default = None
 
-        # default theme
-        with open(resourcePath("vi/ui/res/styles/light.css")) as default:
-            Styles.defaultStyle = default.read()
-        with open(resourcePath("vi/ui/res/styles/light.yaml")) as default:
-            Styles.defaultCommons = yaml.full_load(default)
-        default = None
+            # dark theme
+            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.css"))) as dark:
+                Styles.darkStyle = dark.read()
+            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.yaml"))) as dark:
+                Styles.darkCommons = yaml.full_load(dark)
+            dark = None
+        except Exception as e:
+            logging.critical(e)
 
-        # dark theme
-        with open(resourcePath("vi/ui/res/styles/abyss.css")) as dark:
-            Styles.darkStyle = dark.read()
-        with open(resourcePath("vi/ui/res/styles/abyss.yaml")) as dark:
-            Styles.darkCommons = yaml.full_load(dark)
-        dark = None
 
     def getStyles(self):
         return self.styleList
@@ -62,12 +66,21 @@ class Styles:
             return ""
 
     def getCommons(self):
-        if (Styles.currentStyle == "light"):
+        if (Styles.currentStyle == "light" and Styles.defaultCommons != ""):
             return Styles.defaultCommons
-        elif Styles.currentStyle == "abyss":
+        elif (Styles.currentStyle == "abyss" and Styles.darkCommons != ""):
             return Styles.darkCommons
         else:
-            return ""
+            def_commons = {
+                "bg_colour": '#FFFFFF',
+                "change_lines": False,
+                "line_colour": '#000000',
+                "alarm_colours": ["#FF0000", "#FF9B0F", "#FFFA0F", "#FFFDA2", "#FFFFFF"],
+                "unknown_colour": "#FFFFF",
+                "clear_colour": "#59FF6C",
+                "text_colour": "#000000",
+                "text_inverter": True}
+            return def_commons
 
     def setStyle(self, style):
         if style in Styles.styleList:
@@ -78,7 +91,7 @@ class Styles:
 
 class TextInverter():
     def getTextColourFromBackground(self, colour):
-        if colour[0] is '#':
+        if colour[0] == '#':
             colour = colour[1:]
         red = int(colour[0:2], 16)
         green = int(colour[2:4], 16)
@@ -94,5 +107,5 @@ class TextInverter():
 
 if __name__ == "__main__":
     inv = TextInverter()
-    print ("50E661")
-    print (inv.getTextColourFromBackground("50E661"))
+    print("50E661")
+    print(inv.getTextColourFromBackground("50E661"))

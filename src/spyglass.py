@@ -26,15 +26,16 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 
-from PyQt5 import QtGui, QtWidgets
-
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtWebEngine import QtWebEngine
 from vi import version, PanningWebView
 from vi.ui import viui, systemtray
 from vi.cache import cache
+from vi.ui.styles import Styles
 from vi.resources import resourcePath
 from vi.cache.cache import Cache
-from PyQt5.QtWidgets import  QApplication, QMessageBox
-import sip
+from PyQt5.QtWidgets import QApplication, QMessageBox
+
 
 
 def exceptHook(exceptionType, exceptionValue, tracebackObject):
@@ -58,10 +59,9 @@ backGroundColor = "#c6d9ec"
 class Application(QApplication):
     def __init__(self, args):
         super(Application, self).__init__(args)
-
+        QtWebEngine.initialize()
         splash = QtWidgets.QSplashScreen(QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png")))
         splash.show()
-
         if version.SNAPSHOT:
             QMessageBox.critical(None, "Snapshot", "This is a snapshot release... Use as you will....")
 
@@ -69,8 +69,6 @@ class Application(QApplication):
         chatLogDirectory = ""
         if len(sys.argv) > 1:
             chatLogDirectory = sys.argv[1]
-
-        print(sys.platform  )
 
         if not os.path.exists(chatLogDirectory):
             if sys.platform.startswith("darwin"):
@@ -80,22 +78,25 @@ class Application(QApplication):
                                                     "Eve Online",
                                                     "p_drive", "User", "My Documents", "EVE", "logs", "Chatlogs")
             elif sys.platform.startswith("linux"):
-                chatLogDirectory = os.path.join(os.path.expanduser("~"), "EVE", "logs", "Chatlogs")
+                chatLogDirectory = os.path.join(os.path.expanduser("~"), "Documents", "EVE", "logs", "Chatlogs")
             elif sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
-                #import ctypes.wintypes
-                #buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-                #ctypes.windll.shell32.SHGetFolderPathW(0, 5, 0, 0, buf)
-                #documentsPath = buf.value
+                import ctypes.wintypes
+                buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+                ctypes.windll.shell32.SHGetFolderPathW(0, 0x05, 0, 0, buf)
+                documents_path = buf.value
                 from os.path import expanduser
-                home = expanduser("~")
-                chatLogDirectory = os.path.join(home, "Documents", "EVE", "logs", "Chatlogs")
-
+                chatLogDirectory = os.path.join(documents_path, "EVE", "logs", "Chatlogs")
                 # Now I need to just make sure... Some old pcs could still be on XP
                 if not os.path.exists(chatLogDirectory):
-                    chatLogDirectory = os.path.join(home, "My Documents", "EVE", "logs", "Chatlogs")
+                    chatLogDirectory = os.path.join(os.path.expanduser("~"), "My Documents", "EVE", "logs", "Chatlogs")
+
+        # todo show select folder dialog if path is not valid
+        if not os.path.exists(chatLogDirectory):
+            chatLogDirectory = QtWidgets.QFileDialog.getExistingDirectory(None, caption="Select EVE Online chat  logfiles directory", directory=chatLogDirectory)
+
         if not os.path.exists(chatLogDirectory):
             # None of the paths for logs exist, bailing out
-            QMessageBox.critical(None, "No path to Logs", "No logs found at: " + chatLogDirectory, "Quit")
+            QMessageBox.critical(None, "No path to Logs", "No logs found at: " + chatLogDirectory, QMessageBox.Close )
             sys.exit(1)
 
         # Setting local directory for cache and logging
@@ -115,10 +116,13 @@ class Application(QApplication):
         if version.SNAPSHOT:
             logLevel = logging.DEBUG  # For Testing
         backGroundColor = spyglassCache.getFromCache("background_color")
-        if backGroundColor:
-            self.setStyleSheet("QWidget { background-color: %s; }" % backGroundColor)
 
-        self.processEvents()
+        if backGroundColor:
+            self.setStyleSheet("background-color: %s;" % backGroundColor)
+        css = Styles().getStyle()
+        self.setStyleSheet(css)
+        del css
+
 
         # Setup logging for console and rotated log files
         formatter = logging.Formatter('%(asctime)s| %(message)s', datefmt='%m/%d %I:%M:%S')
@@ -126,6 +130,7 @@ class Application(QApplication):
         rootLogger.setLevel(level=logLevel)
 
         logFilename = spyglassLogDirectory + "/output.log"
+
         fileHandler = RotatingFileHandler(maxBytes=(1048576 * 5), backupCount=7, filename=logFilename, mode='a')
         fileHandler.setFormatter(formatter)
         rootLogger.addHandler(fileHandler)
@@ -137,17 +142,17 @@ class Application(QApplication):
         logging.critical("")
         logging.critical("------------------- Spyglass %s starting up -------------------", version.VERSION)
         logging.critical("")
-        logging.debug("Looking for chat logs at: %s", chatLogDirectory)
-        logging.debug("Cache maintained here: %s", cache.Cache.PATH_TO_CACHE)
-        logging.debug("Writing logs to: %s", spyglassLogDirectory)
-
+        logging.critical(" Looking for chat logs at: {0}".format(chatLogDirectory))
+        logging.critical(" Cache maintained here: {0}".format(cache.Cache.PATH_TO_CACHE))
+        logging.critical(" Writing logs to: {0}".format(spyglassLogDirectory))
         trayIcon = systemtray.TrayIcon(self)
         trayIcon.show()
-        self.mainWindow = viui.MainWindow(chatLogDirectory, trayIcon, backGroundColor)
+        def change_splash_text( txt ):
+            if len(txt):
+                splash.showMessage("    {} ...".format(txt), QtCore.Qt.AlignLeft, QtGui.QColor(0x808000))
+        self.mainWindow = viui.MainWindow(chatLogDirectory, trayIcon, change_splash_text)
         self.mainWindow.show()
         self.mainWindow.raise_()
-        splash.finish(self.mainWindow)
-
 
 # The main application
 if __name__ == "__main__":

@@ -48,13 +48,16 @@ def concat(firstFile, secondFile):
 
     for jumpgroup in secondSvg.select("#jumps"):
         for jump in jumpgroup.select("line"):
-            jump["x1"] = float(jump["x1"]) + 3000
-            jump["x2"] = float(jump["x2"]) + 3000
+            jump["x1"] = float(jump["x1"]) + 1024
+            jump["x2"] = float(jump["x2"]) + 1024
+            jump["y1"] = float(jump["y1"]) + 300
+            jump["y2"] = float(jump["y2"]) + 300
             jumps.append(jump)
 
     for sysgroup in secondSvg.select("#sysuse"):
         for sysuse in sysgroup.select("use"):
-            sysuse["x"] = float(sysuse["x"]) + 3000
+            sysuse["x"] = float(sysuse["x"]) + 1024
+            sysuse["y"] = float(sysuse["y"]) + 300
             systemUses.append(sysuse)
 
     defElement = firstSvg.select("defs")[0]
@@ -83,7 +86,7 @@ def main():
     if len(sys.argv) != 3:
         errout("Sorry, wrong number of arguments. Use this this way:")
         errout("{0} firstmap secondmap".format(sys.argv[0]))
-        errout("All argumens are pathes to files")
+        errout("All arguments are paths to files")
         errout("The new map is written to stdout")
         sys.exit(1)
     checkArguments(sys.argv)

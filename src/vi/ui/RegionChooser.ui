@@ -30,7 +30,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="regionNameField"/>
+      <widget class="QLineEdit" name="regionNameField"/>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -46,6 +46,9 @@
          <property name="text">
           <string>Save</string>
          </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
       </layout>
@@ -54,6 +57,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>regionNameField</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>saveButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
