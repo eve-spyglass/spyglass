@@ -1,18 +1,18 @@
 ###########################################################################
 #  Spyglass - Visual Intel Chat Analyzer								  #
 #  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
-#																		  #
+# 																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
 #  the Free Software Foundation, either version 3 of the License, or	  #
 #  (at your option) any later version.									  #
-#																		  #
+# 																		  #
 #  This program is distributed in the hope that it will be useful,		  #
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
 #  GNU General Public License for more details.							  #
-#																		  #
-#																		  #
+# 																		  #
+# 																		  #
 #  You should have received a copy of the GNU General Public License	  #
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
@@ -38,27 +38,34 @@ class Styles:
     def __init__(self):
         try:
             # default theme
-            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "light.css"))) as default:
+            with open(
+                resourcePath(os.path.join("vi", "ui", "res", "styles", "light.css"))
+            ) as default:
                 Styles.defaultStyle = default.read()
-            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "light.yaml"))) as default:
+            with open(
+                resourcePath(os.path.join("vi", "ui", "res", "styles", "light.yaml"))
+            ) as default:
                 Styles.defaultCommons = yaml.full_load(default)
             default = None
 
             # dark theme
-            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.css"))) as dark:
+            with open(
+                resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.css"))
+            ) as dark:
                 Styles.darkStyle = dark.read()
-            with open(resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.yaml"))) as dark:
+            with open(
+                resourcePath(os.path.join("vi", "ui", "res", "styles", "abyss.yaml"))
+            ) as dark:
                 Styles.darkCommons = yaml.full_load(dark)
             dark = None
         except Exception as e:
             logging.critical(e)
 
-
     def getStyles(self):
         return self.styleList
 
     def getStyle(self):
-        if (Styles.currentStyle == "light"):
+        if Styles.currentStyle == "light":
             return self.defaultStyle
         elif Styles.currentStyle == "abyss":
             return self.darkStyle
@@ -66,20 +73,27 @@ class Styles:
             return ""
 
     def getCommons(self):
-        if (Styles.currentStyle == "light" and Styles.defaultCommons != ""):
+        if Styles.currentStyle == "light" and Styles.defaultCommons != "":
             return Styles.defaultCommons
-        elif (Styles.currentStyle == "abyss" and Styles.darkCommons != ""):
+        elif Styles.currentStyle == "abyss" and Styles.darkCommons != "":
             return Styles.darkCommons
         else:
             def_commons = {
-                "bg_colour": '#FFFFFF',
+                "bg_colour": "#FFFFFF",
                 "change_lines": False,
-                "line_colour": '#000000',
-                "alarm_colours": ["#FF0000", "#FF9B0F", "#FFFA0F", "#FFFDA2", "#FFFFFF"],
+                "line_colour": "#000000",
+                "alarm_colours": [
+                    "#FF0000",
+                    "#FF9B0F",
+                    "#FFFA0F",
+                    "#FFFDA2",
+                    "#FFFFFF",
+                ],
                 "unknown_colour": "#FFFFF",
                 "clear_colour": "#59FF6C",
                 "text_colour": "#000000",
-                "text_inverter": True}
+                "text_inverter": True,
+            }
             return def_commons
 
     def setStyle(self, style):
@@ -89,9 +103,9 @@ class Styles:
             logging.critical("Attempted to switch to unknown style: {}".format(style))
 
 
-class TextInverter():
+class TextInverter:
     def getTextColourFromBackground(self, colour):
-        if colour[0] == '#':
+        if colour[0] == "#":
             colour = colour[1:]
         red = int(colour[0:2], 16)
         green = int(colour[2:4], 16)

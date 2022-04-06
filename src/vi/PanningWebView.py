@@ -1,18 +1,18 @@
 ###########################################################################
 #  Spyglass - Visual Intel Chat Analyzer								  #
 #  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
-#																		  #
+# 																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
 #  the Free Software Foundation, either version 3 of the License, or	  #
 #  (at your option) any later version.									  #
-#																		  #
+# 																		  #
 #  This program is distributed in the hope that it will be useful,		  #
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
 #  GNU General Public License for more details.							  #
-#																		  #
-#																		  #
+# 																		  #
+# 																		  #
 #  You should have received a copy of the GNU General Public License	  #
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
@@ -25,15 +25,17 @@ from PyQt5.QtCore import QPoint, QPointF
 from PyQt5.QtCore import Qt
 import logging
 
+
 class PanningWebView(QWidget):
     ZOOM_WHEEL = 0.2
     webViewScrolled = QtCore.pyqtSignal(bool)
     webViewResized = QtCore.pyqtSignal()
+
     def __init__(self, parent=None):
         super(PanningWebView, self).__init__()
         self.zoom = 1.0
         self.wheel_dir = 1.0
-        self.setImgSize(QtCore.QSize(100,80))
+        self.setImgSize(QtCore.QSize(100, 80))
         self.pressed = False
         self.scrolling = False
         self.positionMousePress = None
@@ -46,7 +48,6 @@ class PanningWebView(QWidget):
         self.svgRenderer = QtSvg.QSvgRenderer()
         self.svgRenderer.setAspectRatioMode(Qt.KeepAspectRatioByExpanding)
         self.svgRenderer.repaintNeeded.connect(self.update)
-
 
     def setContent(self, cnt, type):
         if self.scrolling:
@@ -68,9 +69,12 @@ class PanningWebView(QWidget):
     def paintEvent(self, event):
         if self.svgRenderer:
             painter = QPainter(self)
-            rect = QtCore.QRectF(-self.scrollPos.x(), -self.scrollPos.y(),
-                                 self.svgRenderer.defaultSize().width() * self.zoom,
-                                 self.svgRenderer.defaultSize().height() * self.zoom)
+            rect = QtCore.QRectF(
+                -self.scrollPos.x(),
+                -self.scrollPos.y(),
+                self.svgRenderer.defaultSize().width() * self.zoom,
+                self.svgRenderer.defaultSize().height() * self.zoom,
+            )
             self.svgRenderer.render(painter, rect)
 
     def setZoomFactor(self, zoom):
@@ -85,7 +89,6 @@ class PanningWebView(QWidget):
                 self.setImgSize(self.imgSize)
             self.update()
 
-
     def zoomFactor(self):
         return self.zoom
 
@@ -99,22 +102,22 @@ class PanningWebView(QWidget):
         self.update()
 
     def zoomIn(self, pos=None):
-        if pos==None:
-            self.setZoomFactor(self.zoomFactor() * (1.0+self.ZOOM_WHEEL))
+        if pos == None:
+            self.setZoomFactor(self.zoomFactor() * (1.0 + self.ZOOM_WHEEL))
         else:
-            elemOri=self.mapPosFromPos(pos)
-            self.setZoomFactor(self.zoom * (1.0+self.ZOOM_WHEEL))
-            elemDelta =elemOri-self.mapPosFromPos(pos)
-            self.scrollPos = self.scrollPos+elemDelta*self.zoom
+            elemOri = self.mapPosFromPos(pos)
+            self.setZoomFactor(self.zoom * (1.0 + self.ZOOM_WHEEL))
+            elemDelta = elemOri - self.mapPosFromPos(pos)
+            self.scrollPos = self.scrollPos + elemDelta * self.zoom
 
     def zoomOut(self, pos=None):
         if pos == None:
-            self.setZoomFactor(self.zoom*(1.0-self.ZOOM_WHEEL))
+            self.setZoomFactor(self.zoom * (1.0 - self.ZOOM_WHEEL))
         else:
             elem_ori = self.mapPosFromPos(pos)
-            self.setZoomFactor(self.zoom*(1.0-self.ZOOM_WHEEL))
+            self.setZoomFactor(self.zoom * (1.0 - self.ZOOM_WHEEL))
             elem_delta = elem_ori - self.mapPosFromPos(pos)
-            self.scrollPos = self.scrollPos+elem_delta*self.zoom
+            self.scrollPos = self.scrollPos + elem_delta * self.zoom
 
     def wheelEvent(self, event: QWheelEvent):
         if (self.wheel_dir * event.angleDelta().y()) < 0:
@@ -122,8 +125,12 @@ class PanningWebView(QWidget):
         elif (self.wheel_dir * event.angleDelta().y()) > 0:
             self.zoomOut(event.position())
 
-    def mousePressEvent(self, mouseEvent:QMouseEvent):
-        if not self.pressed and not self.scrolling and mouseEvent.modifiers() == QtCore.Qt.NoModifier:
+    def mousePressEvent(self, mouseEvent: QMouseEvent):
+        if (
+            not self.pressed
+            and not self.scrolling
+            and mouseEvent.modifiers() == QtCore.Qt.NoModifier
+        ):
             if mouseEvent.buttons() == QtCore.Qt.LeftButton:
                 self.pressed = True
                 self.scrolling = False
@@ -132,7 +139,7 @@ class PanningWebView(QWidget):
                 self.scrollMousePress = self.scrollPosition()
                 self.positionMousePress = mouseEvent.pos()
 
-    def mouseReleaseEvent(self, mouseEvent:QMouseEvent):
+    def mouseReleaseEvent(self, mouseEvent: QMouseEvent):
         if self.scrolling:
             self.pressed = False
             self.scrolling = False
@@ -149,13 +156,13 @@ class PanningWebView(QWidget):
             QApplication.restoreOverrideCursor()
             return
 
-    def hoveCheck(self,pos:QPointF)->bool:
+    def hoveCheck(self, pos: QPointF) -> bool:
         return False
 
-    def doubleClicked(self,pos:QPoint)->bool:
+    def doubleClicked(self, pos: QPoint) -> bool:
         return False
 
-    def mouseDoubleClickEvent(self, mouseEvent:QMouseEvent):
+    def mouseDoubleClickEvent(self, mouseEvent: QMouseEvent):
         self.doubleClicked(self.mapPosFromEvent(mouseEvent))
 
     def mapPosFromPos(self, pos: QPointF) -> QPointF:
@@ -164,10 +171,10 @@ class PanningWebView(QWidget):
     def mapPosFromPoint(self, mouseEvent: QPoint) -> QPoint:
         return (mouseEvent + self.scrollPos) / self.zoom
 
-    def mapPosFromEvent(self, mouseEvent:QMouseEvent) -> QPointF:
+    def mapPosFromEvent(self, mouseEvent: QMouseEvent) -> QPointF:
         return (QPointF(mouseEvent.pos()) + self.scrollPos) / self.zoom
 
-    def mouseMoveEvent(self, mouseEvent:QMouseEvent):
+    def mouseMoveEvent(self, mouseEvent: QMouseEvent):
         if self.scrolling:
             if not self.handIsClosed:
                 QApplication.restoreOverrideCursor()
@@ -187,4 +194,3 @@ class PanningWebView(QWidget):
         else:
             QApplication.setOverrideCursor(QtCore.Qt.ArrowCursor)
         return
-

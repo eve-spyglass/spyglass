@@ -1,18 +1,18 @@
 ###########################################################################
 #  Spyglass - Visual Intel Chat Analyzer								  #
 #  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
-#																		  #
+# 																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
 #  the Free Software Foundation, either version 3 of the License, or	  #
 #  (at your option) any later version.									  #
-#																		  #
+# 																		  #
 #  This program is distributed in the hope that it will be useful,		  #
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
 #  GNU General Public License for more details.							  #
-#																		  #
-#																		  #
+# 																		  #
+# 																		  #
 #  You should have received a copy of the GNU General Public License	  #
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
@@ -23,9 +23,8 @@ import logging
 
 
 def resourcePath(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller
-    """
-    if getattr(sys, 'frozen', False):
+    """Get absolute path to resource, works for dev and for PyInstaller"""
+    if getattr(sys, "frozen", False):
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     else:
@@ -37,9 +36,8 @@ def resourcePath(relative_path):
 
 
 def resourcePathExists(relative_path):
-    """ Checks if the absolute path to resource, works for dev and for PyInstaller
-    """
-    if getattr(sys, 'frozen', False):
+    """Checks if the absolute path to resource, works for dev and for PyInstaller"""
+    if getattr(sys, "frozen", False):
         # PyInstaller creates a temp folder and stores path in _MEIPASS
         base_path = sys._MEIPASS
     else:

@@ -1,18 +1,18 @@
 ###########################################################################
 #  Spyglass - Visual Intel Chat Analyzer								  #
 #  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
-#																		  #
+# 																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
 #  the Free Software Foundation, either version 3 of the License, or	  #
 #  (at your option) any later version.									  #
-#																		  #
+# 																		  #
 #  This program is distributed in the hope that it will be useful,		  #
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
 #  GNU General Public License for more details.							  #
-#																		  #
-#																		  #
+# 																		  #
+# 																		  #
 #  You should have received a copy of the GNU General Public License	  #
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
@@ -62,12 +62,17 @@ class AvatarFindThread(QThread):
                 logging.debug("AvatarFindThread getting avatar for %s" % charname)
                 avatar = None
                 if charname == "SPYGLASS":
-                    with open(resourcePath(os.path.join("vi", "ui", "res", "logo_small.png")), "rb") as f:
+                    with open(
+                        resourcePath(os.path.join("vi", "ui", "res", "logo_small.png")),
+                        "rb",
+                    ) as f:
                         avatar = f.read()
                 if avatar is None:
                     avatar = cache.getAvatar(charname)
                     if avatar:
-                        logging.debug("AvatarFindThread found cached avatar for %s" % charname)
+                        logging.debug(
+                            "AvatarFindThread found cached avatar for %s" % charname
+                        )
                 if avatar is None:
                     diffLastCall = time.time() - lastCall
                     if diffLastCall < wait:
@@ -79,10 +84,14 @@ class AvatarFindThread(QThread):
                     else:
                         cache.putAvatar(charname, avatar)
                 if avatar:
-                    logging.debug("AvatarFindThread emit avatar_update for %s" % charname)
+                    logging.debug(
+                        "AvatarFindThread emit avatar_update for %s" % charname
+                    )
                     self.avatar_update.emit(chatEntry, avatar)
                 else:
-                    logging.warning("AvatarFindThread unable to find avatar for %s" % charname)
+                    logging.warning(
+                        "AvatarFindThread unable to find avatar for %s" % charname
+                    )
             except Exception as e:
                 logging.error("Error in AvatarFindThread : %s", e)
 
@@ -103,7 +112,6 @@ class MapStatisticsThread(QThread):
 
     def requestStatistics(self):
         self.queue.put(None)
-
 
     def run(self):
         evegate.getPlayerSovereignty(fore_refresh=False, show_npc=False)

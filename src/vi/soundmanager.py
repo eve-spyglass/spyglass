@@ -1,18 +1,18 @@
 ###########################################################################
 #  Spyglass - Visual Intel Chat Analyzer								  #
 #  Copyright (C) 2017 Crypta Eve (crypta@crypta.tech)                     #
-#																		  #
+# 																		  #
 #  This program is free software: you can redistribute it and/or modify	  #
 #  it under the terms of the GNU General Public License as published by	  #
 #  the Free Software Foundation, either version 3 of the License, or	  #
 #  (at your option) any later version.									  #
-#																		  #
+# 																		  #
 #  This program is distributed in the hope that it will be useful,		  #
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of		  #
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the		  #
 #  GNU General Public License for more details.							  #
-#																		  #
-#																		  #
+# 																		  #
+# 																		  #
 #  You should have received a copy of the GNU General Public License	  #
 #  along with this program.	 If not, see <http://www.gnu.org/licenses/>.  #
 ###########################################################################
@@ -44,7 +44,9 @@ class SoundManager(metaclass=Singleton):
         self.worker = QThread()
         self.speach_engine = QTextToSpeech()
         cache = Cache()
-        self.setSoundFile("alarm", "178032__zimbot__redalert-klaxon-sttos-recreated.wav")
+        self.setSoundFile(
+            "alarm", "178032__zimbot__redalert-klaxon-sttos-recreated.wav"
+        )
         vol = cache.getFromCache("soundsetting.volume")
         if vol:
             self.setSoundVolume(float(vol))
@@ -73,7 +75,11 @@ class SoundManager(metaclass=Singleton):
             if self.SOUNDS[itm] != None and os.path.exists(self.SOUNDS[itm]):
                 url = QUrl.fromLocalFile(self.SOUNDS[itm])
             elif self.SOUNDS[itm] != None:
-                url = QUrl.fromLocalFile(resourcePath(os.path.join("vi", "ui", "res", "{0}".format(self.SOUNDS[itm]))))
+                url = QUrl.fromLocalFile(
+                    resourcePath(
+                        os.path.join("vi", "ui", "res", "{0}".format(self.SOUNDS[itm]))
+                    )
+                )
             else:
                 url = None
             if url != None:
@@ -88,12 +94,14 @@ class SoundManager(metaclass=Singleton):
         avail_engines = self.speach_engine.availableEngines()
         if len(avail_engines):
             for eng_name in avail_engines:
-                logging.info("Available sound engine \'{}\'".format(eng_name))
+                logging.info("Available sound engine '{}'".format(eng_name))
             self.speach_engine.setLocale(QLocale(QLocale.English))
             return True
         else:
             self.useSpokenNotifications = False
-            logging.critical(" There is no text to speak engine available, all text to speak function disabled.")
+            logging.critical(
+                " There is no text to speak engine available, all text to speak function disabled."
+            )
             return False
 
     def setUseSpokenNotifications(self, new_value):
@@ -107,7 +115,10 @@ class SoundManager(metaclass=Singleton):
 
     def playSound(self, name="alarm", message="", abbreviatedMessage=""):
         logging.debug(
-            "playsound. name: {}, amessage: {}, volume: {}".format(name, abbreviatedMessage, self.soundVolume))
+            "playsound. name: {}, amessage: {}, volume: {}".format(
+                name, abbreviatedMessage, self.soundVolume
+            )
+        )
         logging.debug(self.sounds)
         if self.soundAvailable and self.soundActive:
             if self.useSpokenNotifications and abbreviatedMessage != "":

@@ -4,7 +4,7 @@ import threading
 
 
 class Singleton(type):
-    """ A singleton metaclass. """
+    """A singleton metaclass."""
 
     def __init__(cls, name, bases, dictionary):
         super(Singleton, cls).__init__(name, bases, dictionary)
@@ -18,9 +18,9 @@ class Singleton(type):
         return cls._instance
 
 
-'''
+"""
 	Example usage - its that simple!
 
 	class Sound():
 		__metaclass__ = Singleton
-'''
+"""
