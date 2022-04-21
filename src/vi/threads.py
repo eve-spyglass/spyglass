@@ -20,7 +20,7 @@
 import time
 import logging
 import queue
-from PyQt5.QtCore import QThread, QTimer, pyqtSignal
+from PyQt6.QtCore import QThread, QTimer, pyqtSignal
 from vi import evegate
 from vi.cache.cache import Cache
 from vi.resources import resourcePath

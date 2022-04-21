@@ -23,7 +23,7 @@ matrix:
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
 install:
   - pip3 install --upgrade pip  # all three OSes agree about 'pip3'
-  - pip3 install pyqt5
+  - pip3 install PyQt6
   - pip3 install -r src/requirements.txt
   - pip3 install pyinstaller==3.5
 # 'python' points to Python 2.7 on macOS but points to Python 3.7 on Linux and Windows

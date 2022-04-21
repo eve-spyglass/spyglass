@@ -26,60 +26,70 @@ import traceback
 from logging.handlers import RotatingFileHandler
 from logging import StreamHandler
 
-from PyQt5 import QtGui, QtWidgets, QtCore
-from PyQt5.QtWebEngine import QtWebEngine
+from PyQt6 import QtGui, QtWidgets, QtCore
+from PyQt6.QtWebEngineQuick import QtWebEngineQuick
 from vi import version, PanningWebView
 from vi.ui import viui, systemtray
 from vi.cache import cache
 from vi.ui.styles import Styles
 from vi.resources import resourcePath
 from vi.cache.cache import Cache
-from PyQt5.QtWidgets import QApplication, QMessageBox
+from PyQt6.QtWidgets import QApplication, QMessageBox
 
 
-def exceptHook(exceptionType, exceptionValue, tracebackObject):
+def except_hook(exception_type, exception_value, traceback_object):
+    # pylint: disable=broad-except,logging-fstring-interpolation
     """
     Global function to catch unhandled exceptions.
     """
     try:
         logging.critical("-- Unhandled Exception --")
-        logging.critical("".join(traceback.format_tb(tracebackObject)))
+        logging.critical("".join(traceback.format_tb(traceback_object)))
         # traceback.print_tb(tracebackObject)
-        logging.critical("{0}: {1}".format(exceptionType, exceptionValue))
+        logging.critical(f"{exception_type}: {exception_value}")
         logging.critical("-- ------------------- --")
     except Exception:
         pass
 
 
-sys.excepthook = exceptHook
-backGroundColor = "#c6d9ec"
+sys.excepthook = except_hook
+BACKGROUND_COLOR = "#c6d9ec"
 
 
 class Application(QApplication):
     def __init__(self, args):
         super(Application, self).__init__(args)
-        QtWebEngine.initialize()
+        QtWebEngineQuick.initialize()
         splash = QtWidgets.QSplashScreen(
             QtGui.QPixmap(resourcePath("vi/ui/res/logo_splash.png"))
         )
         splash.show()
         if version.SNAPSHOT:
             QMessageBox.critical(
-                None, "Snapshot", "This is a snapshot release... Use as you will...."
+                splash, "Snapshot", "This is a snapshot release... Use as you will...."
             )
 
-        # Set up paths
-        chatLogDirectory = ""
-        if len(sys.argv) > 1:
-            chatLogDirectory = sys.argv[1]
+        def change_splash_text(txt):
+            if len(txt):
+                splash.showMessage(
+                    f"    {txt} ...",
+                    QtCore.Qt.AlignmentFlag.AlignLeft,
+                    QtGui.QColor(0x808000),
+                )
 
-        if not os.path.exists(chatLogDirectory):
+        # Set up paths
+        chat_log_directory = ""
+        if len(sys.argv) > 1:
+            chat_log_directory = sys.argv[1]
+
+        if not os.path.exists(chat_log_directory):
+            change_splash_text("Searching for EVE Logs")
             if sys.platform.startswith("darwin"):
-                chatLogDirectory = os.path.join(
+                chat_log_directory = os.path.join(
                     os.path.expanduser("~"), "Documents", "EVE", "logs", "Chatlogs"
                 )
-                if not os.path.exists(chatLogDirectory):
-                    chatLogDirectory = os.path.join(
+                if not os.path.exists(chat_log_directory):
+                    chat_log_directory = os.path.join(
                         os.path.expanduser("~"),
                         "Library",
                         "Application Support",
@@ -92,7 +102,7 @@ class Application(QApplication):
                         "Chatlogs",
                     )
             elif sys.platform.startswith("linux"):
-                chatLogDirectory = os.path.join(
+                chat_log_directory = os.path.join(
                     os.path.expanduser("~"), "Documents", "EVE", "logs", "Chatlogs"
                 )
             elif sys.platform.startswith("win32") or sys.platform.startswith("cygwin"):
@@ -101,14 +111,13 @@ class Application(QApplication):
                 buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
                 ctypes.windll.shell32.SHGetFolderPathW(0, 0x05, 0, 0, buf)
                 documents_path = buf.value
-                from os.path import expanduser
 
-                chatLogDirectory = os.path.join(
+                chat_log_directory = os.path.join(
                     documents_path, "EVE", "logs", "Chatlogs"
                 )
                 # Now I need to just make sure... Some old pcs could still be on XP
-                if not os.path.exists(chatLogDirectory):
-                    chatLogDirectory = os.path.join(
+                if not os.path.exists(chat_log_directory):
+                    chat_log_directory = os.path.join(
                         os.path.expanduser("~"),
                         "My Documents",
                         "EVE",
@@ -116,46 +125,47 @@ class Application(QApplication):
                         "Chatlogs",
                     )
 
-        # todo show select folder dialog if path is not valid
-        if not os.path.exists(chatLogDirectory):
-            chatLogDirectory = QtWidgets.QFileDialog.getExistingDirectory(
+        if not os.path.exists(chat_log_directory):
+            chat_log_directory = QtWidgets.QFileDialog.getExistingDirectory(
                 None,
                 caption="Select EVE Online chat  logfiles directory",
-                directory=chatLogDirectory,
+                directory=chat_log_directory,
             )
 
-        if not os.path.exists(chatLogDirectory):
+        if not os.path.exists(chat_log_directory):
             # None of the paths for logs exist, bailing out
             QMessageBox.critical(
-                None,
+                splash,
                 "No path to Logs",
-                "No logs found at: " + chatLogDirectory,
+                "No logs found at: " + chat_log_directory,
                 QMessageBox.Close,
             )
             sys.exit(1)
 
         # Setting local directory for cache and logging
-        spyglassDir = os.path.join(
-            os.path.dirname(os.path.dirname(chatLogDirectory)), "spyglass"
+        change_splash_text("Setting Spyglass Directories")
+        spyglass_dir = os.path.join(
+            os.path.dirname(os.path.dirname(chat_log_directory)), "spyglass"
         )
-        if not os.path.exists(spyglassDir):
-            os.mkdir(spyglassDir)
-        cache.Cache.PATH_TO_CACHE = os.path.join(spyglassDir, "cache-2.sqlite3")
+        if not os.path.exists(spyglass_dir):
+            os.mkdir(spyglass_dir)
+        cache.Cache.PATH_TO_CACHE = os.path.join(spyglass_dir, "cache-2.sqlite3")
 
-        spyglassLogDirectory = os.path.join(spyglassDir, "logs")
-        if not os.path.exists(spyglassLogDirectory):
-            os.mkdir(spyglassLogDirectory)
+        spyglass_log_directory = os.path.join(spyglass_dir, "logs")
+        if not os.path.exists(spyglass_log_directory):
+            os.mkdir(spyglass_log_directory)
 
-        spyglassCache = Cache()
-        logLevel = spyglassCache.getFromCache("logging_level")
-        if not logLevel:
-            logLevel = logging.WARN
+        change_splash_text("Connecting to Cache")
+        spyglass_cache = Cache()
+        log_level = spyglass_cache.getFromCache("logging_level")
+        if not log_level:
+            log_level = logging.WARN
         if version.SNAPSHOT:
-            logLevel = logging.DEBUG  # For Testing
-        backGroundColor = spyglassCache.getFromCache("background_color")
+            log_level = logging.DEBUG  # For Testing
+        BACKGROUND_COLOR = spyglass_cache.getFromCache("background_color")
 
-        if backGroundColor:
-            self.setStyleSheet("background-color: %s;" % backGroundColor)
+        if BACKGROUND_COLOR:
+            self.setStyleSheet(f"background-color: {BACKGROUND_COLOR};")
         css = Styles().getStyle()
         self.setStyleSheet(css)
         del css
@@ -164,20 +174,20 @@ class Application(QApplication):
         formatter = logging.Formatter(
             "%(asctime)s| %(message)s", datefmt="%m/%d %I:%M:%S"
         )
-        rootLogger = logging.getLogger()
-        rootLogger.setLevel(level=logLevel)
+        root_logger = logging.getLogger()
+        root_logger.setLevel(level=log_level)
 
-        logFilename = spyglassLogDirectory + "/output.log"
+        log_filename = spyglass_log_directory + "/output.log"
 
-        fileHandler = RotatingFileHandler(
-            maxBytes=(1048576 * 5), backupCount=7, filename=logFilename, mode="a"
+        file_handler = RotatingFileHandler(
+            maxBytes=(1048576 * 5), backupCount=7, filename=log_filename, mode="a"
         )
-        fileHandler.setFormatter(formatter)
-        rootLogger.addHandler(fileHandler)
+        file_handler.setFormatter(formatter)
+        root_logger.addHandler(file_handler)
 
-        consoleHandler = StreamHandler()
-        consoleHandler.setFormatter(formatter)
-        rootLogger.addHandler(consoleHandler)
+        console_handler = StreamHandler()
+        console_handler.setFormatter(formatter)
+        root_logger.addHandler(console_handler)
 
         logging.critical("")
         logging.critical(
@@ -185,30 +195,22 @@ class Application(QApplication):
             version.VERSION,
         )
         logging.critical("")
-        logging.critical(" Looking for chat logs at: {0}".format(chatLogDirectory))
+        logging.critical(" Looking for chat logs at: %s", chat_log_directory)
         logging.critical(
-            " Cache maintained here: {0}".format(cache.Cache.PATH_TO_CACHE)
+            " Cache maintained here: %s", cache.Cache.PATH_TO_CACHE
         )
-        logging.critical(" Writing logs to: {0}".format(spyglassLogDirectory))
-        trayIcon = systemtray.TrayIcon(self)
-        trayIcon.show()
+        logging.critical(" Writing logs to: %s", spyglass_log_directory)
+        tray_icon = systemtray.TrayIcon(self)
+        tray_icon.show()
 
-        def change_splash_text(txt):
-            if len(txt):
-                splash.showMessage(
-                    "    {} ...".format(txt),
-                    QtCore.Qt.AlignLeft,
-                    QtGui.QColor(0x808000),
-                )
-
-        self.mainWindow = viui.MainWindow(
-            chatLogDirectory, trayIcon, change_splash_text
+        self.main_window = viui.MainWindow(
+            chat_log_directory, tray_icon, change_splash_text
         )
-        self.mainWindow.show()
-        self.mainWindow.raise_()
+        self.main_window.show()
+        self.main_window.raise_()
 
 
 # The main application
 if __name__ == "__main__":
     app = Application(sys.argv)
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

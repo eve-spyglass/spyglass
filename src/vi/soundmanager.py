@@ -20,13 +20,13 @@
 import os
 import logging
 
-from PyQt5.QtCore import QThread, QLocale
+from PyQt6.QtCore import QThread, QLocale
 from .resources import resourcePath
 from vi.singleton import Singleton
-from PyQt5.QtMultimedia import QSoundEffect
-from PyQt5.QtTextToSpeech import QTextToSpeech
-from PyQt5.QtWidgets import qApp
-from PyQt5.QtCore import *
+from PyQt6.QtMultimedia import QSoundEffect
+
+# from PyQt6.QtTextToSpeech import QTextToSpeech
+from PyQt6.QtCore import *
 from vi.cache.cache import Cache
 
 
@@ -42,7 +42,7 @@ class SoundManager(metaclass=Singleton):
     def __init__(self):
         self.sounds = {}
         self.worker = QThread()
-        self.speach_engine = QTextToSpeech()
+        # self.speach_engine = QTextToSpeech()
         cache = Cache()
         self.setSoundFile(
             "alarm", "178032__zimbot__redalert-klaxon-sttos-recreated.wav"
@@ -91,6 +91,7 @@ class SoundManager(metaclass=Singleton):
         return True
 
     def platformSupportsSpeech(self):
+        return False
         avail_engines = self.speach_engine.availableEngines()
         if len(avail_engines):
             for eng_name in avail_engines:
@@ -136,10 +137,10 @@ class SoundManager(metaclass=Singleton):
                 self.sounds["alarm"].setMuted(False)
                 self.sounds["alarm"].play()
                 self.sounds["alarm"].status()
-        qApp.processEvents()
+        QCoreApplication.processEvents()
 
     def quit(self):
-        qApp.processEvents()
+        QCoreApplication.processEvents()
 
     def wait(self):
-        qApp.processEvents()
+        QCoreApplication.processEvents()

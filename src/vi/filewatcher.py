@@ -22,10 +22,10 @@ import stat
 import time
 import logging
 
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
-# from PyQt5.QtCore import SIGNAL
-from PyQt5.QtCore import pyqtSignal
+# from PyQt6.QtCore import SIGNAL
+from PyQt6.QtCore import pyqtSignal
 
 """
 There is a problem with the QFIleWatcher on Windows and the log

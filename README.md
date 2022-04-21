@@ -72,7 +72,7 @@ Spyglass is not compatible with Python 3! (yet)
 - PyQt4x
 http://www.riverbankcomputing.com/software/pyqt/download
 Please use the PyQt Binary Package for Py2.7
-Spyglass is not compatible with PyQt5! (yet)
+Spyglass is not compatible with PyQt6! (yet)
 - BeautifulSoup 4
 https://pypi.python.org/pypi/beautifulsoup4
 - Pyglet 1.2.4 (for python 2.7)

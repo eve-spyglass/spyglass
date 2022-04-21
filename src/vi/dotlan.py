@@ -275,8 +275,9 @@ class Map(object):
     def _prepareGradients(self, soup):
 
         grad_located = soup.new_tag("radialGradient", id="grad_located")
+        grad_located["r"] = "0.5"
         stop = soup.new_tag("stop")
-        stop["offset"] = "50%"
+        stop["offset"] = "0.5"
         stop["stop-color"] = "#8b008d"
         stop["stop-opacity"] = "1"
         grad_located.append(stop)
@@ -689,6 +690,7 @@ class System(object):
         marker["activated"] = datetime.datetime.utcnow().timestamp()
 
     def addLocatedCharacter(self, charname):
+        logging.debug("adding char {} to {}".format(charname, self.name))
         idName = self.name + "_loc"
         wasLocated = bool(self.__locatedCharacters)
         if charname not in self.__locatedCharacters:

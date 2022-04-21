@@ -1,61 +1,34 @@
-# -*- mode: python -*-
-import sys
+# -*- mode: python ; coding: utf-8 -*-
 
-app_name = 'spyglass'
+
 block_cipher = None
 
+
 a = Analysis(['spyglass.py'],
-             pathex=['C:\\spyglass\\spyglass\\src' if sys.platform == 'win32' else '/home/crypta/spyglass/src'],
-             binaries=None,
-             datas=None,
-             hiddenimports=[],
+             pathex=['C:\\src', 'C:\\spyglass\\spyglass\\src'],
+             binaries=[('./lib/*.dll', './lib')],
+             datas=[('./vi/ui/*.ui', './vi/ui'), ('./vi/ui/res/*', './vi/ui/res'), ('./vi/ui/res/styles/*', './vi/ui/res/styles')],
+             hiddenimports=['pyttsx3.drivers', 'pyttsx3.drivers.dummy', 'import=pyttsx3.drivers.espeak', 'pyttsx3.drivers.nsss', 'pyttsx3.drivers.sapi5', 'PyQt6.QtWebChannel', 'PyQt6.QtWebEngineCore', 'PyQt6.QtQml'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
-
-pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
-
-a.datas += [('vi/ui/MainWindow.ui', 'vi/ui/MainWindow.ui', 'DATA'),
-            ('vi/ui/SystemChat.ui', 'vi/ui/SystemChat.ui', 'DATA'),
-            ('vi/ui/ChatEntry.ui', 'vi/ui/ChatEntry.ui', 'DATA'),
-            ('vi/ui/Info.ui', 'vi/ui/Info.ui', 'DATA'),
-            ('vi/ui/ChatroomsChooser.ui', 'vi/ui/ChatroomsChooser.ui', 'DATA'),
-            ('vi/ui/RegionChooser.ui', 'vi/ui/RegionChooser.ui', 'DATA'),
-            ('vi/ui/SoundSetup.ui', 'vi/ui/SoundSetup.ui', 'DATA'),
-            ('vi/ui/JumpbridgeChooser.ui', 'vi/ui/JumpbridgeChooser.ui', 'DATA'),
-            ('vi/ui/res/qmark.png', 'vi/ui/res/qmark.png', 'DATA'),
-            ('vi/ui/res/logo.png', 'vi/ui/res/logo.png', 'DATA'),
-            ('vi/ui/res/logo_splash.png', 'vi/ui/res/logo_splash.png', 'DATA'),
-            ('vi/ui/res/logo_small.png', 'vi/ui/res/logo_small.png', 'DATA'),
-            ('vi/ui/res/logo_small_green.png', 'vi/ui/res/logo_small_green.png', 'DATA'),
-            ('vi/ui/res/178028__zimbot__bosun-whistle-sttos-recreated.wav', 'vi/ui/res/178028__zimbot__bosun-whistle-sttos-recreated.wav', 'DATA'),
-            ('vi/ui/res/178031__zimbot__transporterstartbeep0-sttos-recreated.wav', 'vi/ui/res/178031__zimbot__transporterstartbeep0-sttos-recreated.wav', 'DATA'),
-            ('vi/ui/res/178032__zimbot__redalert-klaxon-sttos-recreated.wav', 'vi/ui/res/178032__zimbot__redalert-klaxon-sttos-recreated.wav', 'DATA'),
-            ('vi/ui/res/mapdata/Providencecatch.svg', 'vi/ui/res/mapdata/Providencecatch.svg', 'DATA'),
-            ('vi/ui/res/styles/abyss.css', 'vi/ui/res/styles/abyss.css', 'DATA'),
-            ('vi/ui/res/styles/abyss.yaml', 'vi/ui/res/styles/abyss.yaml', 'DATA'),
-            ('vi/ui/res/styles/light.css', 'vi/ui/res/styles/light.css', 'DATA'),
-            ('vi/ui/res/styles/light.yaml', 'vi/ui/res/styles/light.yaml', 'DATA'),
-            ('docs/jumpbridgeformat.txt', 'docs/jumpbridgeformat.txt', 'DATA'),
-            ]
-
 exe = EXE(pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name=os.path.join('dist', app_name + ('.exe' if sys.platform == 'win32' else '')),
+          [],
+          name='spyglass',
           debug=False,
-          strip=False,
-          icon='icon.ico',
-          console=False,
-          cipher=block_cipher)
-
-# Build a .app if on OS X
-if sys.platform == 'darwin':
-   app = BUNDLE(exe,
-                name=app_name + '.app',
-                icon='icon.ico')
+          bootloader_ignore_signals=False,
+          strip=True,
+          upx=True,
+          upx_exclude=[],
+          runtime_tmpdir=None,
+          console=False , icon='.\\icon.ico')

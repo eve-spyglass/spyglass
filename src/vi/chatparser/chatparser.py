@@ -24,7 +24,7 @@ import logging
 
 from bs4 import BeautifulSoup
 from vi import states
-from PyQt5.QtWidgets import QMessageBox
+from PyQt6.QtWidgets import QMessageBox
 
 from .parser_functions import parseStatus
 from .parser_functions import parseUrls, parseShips, parseSystems
@@ -113,6 +113,7 @@ class ChatParser(object):
                         self.fileData[path]["sessionstart"] = sessionStart
                         break
         self.fileData[path]["lines"] = len(lines)
+        logging.debug([m.encode("ascii", "ignore") for m in lines])
         return lines
 
     def _lineToMessage(self, line, roomname):

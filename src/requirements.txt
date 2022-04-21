@@ -1,9 +1,8 @@
 altgraph
 beautifulsoup4
 future
-PyQt5
-PyQtWebEngine
-PyQt5-stubs
+PyQt6
+PyQt6-WebEngine
 PyYAML
 requests
 urllib3

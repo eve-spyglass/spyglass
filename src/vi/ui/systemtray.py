@@ -21,11 +21,10 @@ import time
 import os
 import logging
 
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtWidgets import QAction, QActionGroup
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QSystemTrayIcon
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QAction, QActionGroup, QIcon
+from PyQt6.QtWidgets import QSystemTrayIcon
 from vi.resources import resourcePath
 from vi import states
 from vi.soundmanager import SoundManager
@@ -48,21 +47,17 @@ class TrayContextMenu(QtWidgets.QMenu):
         pass
 
     def _buildMenu(self):
-        self.framelessCheck = QtWidgets.QAction(
-            "Frameless Window", self, checkable=True
-        )
+        self.framelessCheck = QAction("Frameless Window", self, checkable=True)
         self.framelessCheck.triggered.connect(self.trayIcon.changeFrameless)
         self.addAction(self.framelessCheck)
         self.addSeparator()
-        self.requestCheck = QtWidgets.QAction(
+        self.requestCheck = QAction(
             "Show status request notifications", self, checkable=True
         )
         self.requestCheck.setChecked(True)
         self.addAction(self.requestCheck)
         self.requestCheck.triggered.connect(self.trayIcon.switchRequest)
-        self.alarmCheck = QtWidgets.QAction(
-            "Show alarm notifications", self, checkable=True
-        )
+        self.alarmCheck = QAction("Show alarm notifications", self, checkable=True)
         self.alarmCheck.setChecked(True)
         self.alarmCheck.triggered.connect(self.trayIcon.switchAlarm)
         self.addAction(self.alarmCheck)

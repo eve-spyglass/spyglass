@@ -21,9 +21,9 @@ import json
 import requests
 import logging
 
-from PyQt5 import Qt
+from PyQt6 import Qt
 
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 from vi import version
 from vi.cache.cache import Cache
 from distutils.version import LooseVersion, StrictVersion

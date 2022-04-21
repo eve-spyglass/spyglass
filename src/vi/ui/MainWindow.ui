@@ -395,7 +395,7 @@
     <item row="1" column="0">
      <widget class="QPushButton" name="updateAvail">
       <property name="text">
-       <string>PushButton</string>
+       <string>Update Available!</string>
       </property>
      </widget>
     </item>
@@ -486,12 +486,6 @@
      </property>
      <addaction name="separator"/>
     </widget>
-    <widget class="QMenu" name="menuChars">
-     <property name="title">
-      <string>Chars used</string>
-     </property>
-    </widget>
-    <addaction name="menuChars"/>
     <addaction name="menuTime"/>
     <addaction name="clearIntelAction"/>
     <addaction name="autoRescanAction"/>

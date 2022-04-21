@@ -26,12 +26,12 @@ import webbrowser
 
 import vi.version
 import logging
-from PyQt5.QtGui import *
-from PyQt5 import QtGui, QtCore, QtWidgets, uic
+from PyQt6.QtGui import *
+from PyQt6 import QtGui, QtCore, QtWidgets, uic
 
-from PyQt5.QtCore import QPoint, QPointF, QByteArray, pyqtSignal
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtWidgets import QMessageBox, QStyleOption, QStyle, QFileDialog
+from PyQt6.QtCore import QPoint, QPointF, QByteArray, pyqtSignal
+from PyQt6.QtGui import QImage, QPixmap
+from PyQt6.QtWidgets import QMessageBox, QStyleOption, QStyle, QFileDialog
 from vi import evegate
 from vi import dotlan, filewatcher
 from vi import states
@@ -42,8 +42,8 @@ from vi.threads import AvatarFindThread, MapStatisticsThread
 from vi.ui.systemtray import TrayContextMenu
 from vi.ui.styles import Styles
 from vi.chatparser.chatparser import ChatParser, Message
-from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QActionGroup
+from PyQt6.QtGui import QAction, QActionGroup
+
 
 # Timer intervals
 MAP_UPDATE_INTERVAL_MSECS = 1000
@@ -63,14 +63,19 @@ class MainWindow(QtWidgets.QMainWindow):
                 update_splash(string)
 
         QtWidgets.QMainWindow.__init__(self)
+        update_splash_window_info("Creating local Cache")
         self.cache = Cache()
 
+        update_splash_window_info("Loading MainWindow")
         uic.loadUi(resourcePath(os.path.join("vi", "ui", "MainWindow.ui")), self)
         self.setWindowTitle(
             "Spyglass "
             + vi.version.VERSION
             + "{dev}".format(dev="-SNAPSHOT" if vi.version.SNAPSHOT else "")
         )
+        self.updateAvail.hide()
+
+        update_splash_window_info("Setting up UI")
         self.taskbarIconQuiescent = QtGui.QIcon(
             resourcePath(os.path.join("vi", "ui", "res", "logo_small.png"))
         )
@@ -78,7 +83,7 @@ class MainWindow(QtWidgets.QMainWindow):
             resourcePath(os.path.join("vi", "ui", "res", "logo_small_green.png"))
         )
         self.setWindowIcon(self.taskbarIconQuiescent)
-        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
         self.pathToLogs = pathToLogs
         self.currContent = None
         self.mapTimer = QtCore.QTimer(self)
@@ -89,18 +94,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.trayIcon = trayIcon
         self.trayIcon.activated.connect(self.systemTrayActivated)
         self.clipboard = QtWidgets.QApplication.clipboard()
-        self.clipboard.clear(mode=self.clipboard.Clipboard)
+        self.clipboard.clear(mode=self.clipboard.Mode.Clipboard)
         self.alarmDistance = 0
         self.lastStatisticsUpdate = 0
         self.chatEntries = []
         self.frameButton.setVisible(False)
         self.scanIntelForKosRequestsEnabled = False
         self.initialMapPosition = None
-        self.autoChangeRegion = False
         self.mapPositionsDict = {}
         self.invertWheel = True
         self.autoRescanIntelEnabled = Cache().getFromCache("changeAutoRescanIntel")
+
         # Load user's toon names
+        update_splash_window_info("Setting up User Settings")
         self.knownPlayerNames = Cache().getFromCache("known_player_names")
         if self.knownPlayerNames:
             self.knownPlayerNames = set(self.knownPlayerNames.split(","))
@@ -108,7 +114,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.knownPlayerNames = set()
             diagText = "Spyglass scans EVE system logs and remembers your characters as they change systems.\n\nSome features (clipboard KOS checking, alarms, etc.) may not work until your character(s) have been registered. Change systems, with each character you want to monitor, while Spyglass is running to remedy this."
             QMessageBox.warning(
-                None, "Known Characters not Found", diagText, QMessageBox.Ok
+                self,
+                "Known Characters not Found",
+                diagText,
+                QMessageBox.StandardButton.Ok,
             )
 
         if self.invertWheel is None:
@@ -152,7 +161,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.intelTimeGroup.addAction(action)
             self.menuTime.addAction(action)
 
-        self.actionAuto_switch.triggered.connect(self.changeAutoRegion)
         # Set up Theme menu - fill in list of themes and add connections
         self.themeGroup = QActionGroup(self.menu)
         styles = Styles()
@@ -167,6 +175,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.menuTheme.addAction(action)
         styles = None
 
+        update_splash_window_info("Setting up ChatParser")
         self.chatparser = ChatParser(
             self.pathToLogs, self.roomnames, None, self.intelTimeGroup.intelTime
         )
@@ -179,7 +188,8 @@ class MainWindow(QtWidgets.QMainWindow):
         if initialTheme:
             self.changeTheme(initialTheme)
         else:
-            self.setupMap(True)
+            self.setupMap(True, callback=update_splash_window_info)
+        update_splash_window_info("Checking for Updates")
         update_avail = evegate.checkSpyglassVersionUpdate()
         if update_avail[0]:
             self.updateAvail.show()
@@ -194,6 +204,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         else:
             self.updateAvail.hide()
+            logging.info("no update available: %s", update_avail[1])
+        update_splash_window_info("MainWindow done!")
 
     def wheelDirChanged(self, checked):
         self.invertWheel = checked
@@ -207,7 +219,9 @@ class MainWindow(QtWidgets.QMainWindow):
         opt = QStyleOption()
         opt.initFrom(self)
         painter = QPainter(self)
-        self.style().drawPrimitive(QStyle.PE_Widget, opt, painter, self)
+        self.style().drawPrimitive(
+            QStyle.PrimitiveElement.PE_Widget, opt, painter, self
+        )
 
     def recallCachedSettings(self):
         try:
@@ -220,9 +234,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 "Something went wrong loading saved state:\n {0}".format(str(e)),
                 1,
             )
-
-    def changeAutoRegion(self, autoChange: bool):
-        self.autoChangeRegion = autoChange
 
     def wireUpUIConnections(self):
         self.clipboard.dataChanged.connect(self.clipboardChanged)
@@ -394,7 +405,7 @@ class MainWindow(QtWidgets.QMainWindow):
         def mapContextMenuEvent(event):
             # if QApplication.activeWindow() or QApplication.focusWidget():
             self.trayIcon.contextMenu().updateMenu(None)
-            self.trayIcon.contextMenu().exec_(
+            self.trayIcon.contextMenu().exec(
                 self.mapToGlobal(QPoint(event.x(), event.y()))
             )
 
@@ -417,7 +428,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.trayIcon.contextMenu().hasJumpGate = lambda name: Cache().hasJumpGate(name)
 
-    def setupMap(self, initialize=False):
+    def setupMap(self, initialize=False, callback=None):
         self.filewatcherThread.paused = True
         regionName = Cache().getFromCache("region_name")
         if not regionName:
@@ -441,7 +452,7 @@ class MainWindow(QtWidgets.QMainWindow):
             # todo:fix static updates
             # setSatisticsVisible=self.statisticsButton.isChecked()
 
-            self.dotlan._applySystemStatistic(evegate.getPlayerSovereignty(True))
+            self.dotlan._applySystemStatistic(evegate.getPlayerSovereignty(True, callback=callback))
         except dotlan.DotlanException as e:
             logging.error(e)
             QMessageBox.critical(None, "Error getting map", str(e), QMessageBox.Close)
@@ -557,7 +568,6 @@ class MainWindow(QtWidgets.QMainWindow):
             ),
             (None, "changeAutoScanIntel", self.scanIntelForKosRequestsEnabled),
             (None, "changeAutoRescanIntel", self.autoRescanIntelEnabled),
-            (None, "changeAutoChangeRegion", self.autoChangeRegion),
             (None, "wheelDirChanged", self.invertWheel),
         )
 
@@ -586,12 +596,6 @@ class MainWindow(QtWidgets.QMainWindow):
             newValue = self.autoScanIntelAction.isChecked()
         self.autoScanIntelAction.setChecked(newValue)
         self.autoRescanIntelEnabled = newValue
-
-    def changeAutoChangeRegion(self, newValue=None):
-        if newValue is None:
-            newValue = self.actionAuto_switch.isChecked()
-        self.actionAuto_switch.setChecked(newValue)
-        self.autoChangeRegion = newValue
 
     def changeAutoRescanIntel(self, newValue=None):
         if newValue is None:
@@ -674,9 +678,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.hide()
         self.alwaysOnTopAction.setChecked(newValue)
         if newValue:
-            self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+            self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowStaysOnTopHint)
         else:
-            self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowStaysOnTopHint))
+            self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowType.WindowStaysOnTopHint))
         self.show()
 
     def changeFrameless(self, newValue=None):
@@ -684,10 +688,10 @@ class MainWindow(QtWidgets.QMainWindow):
             newValue = not self.frameButton.isVisible()
         self.hide()
         if newValue:
-            self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
+            self.setWindowFlags(QtCore.Qt.WindowType.FramelessWindowHint)
             self.changeAlwaysOnTop(True)
         else:
-            self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.FramelessWindowHint))
+            self.setWindowFlags(self.windowFlags() & (~QtCore.Qt.WindowType.FramelessWindowHint))
         self.menubar.setVisible(not newValue)
         self.frameButton.setVisible(newValue)
         self.framelessWindowAction.setChecked(newValue)
@@ -768,40 +772,16 @@ class MainWindow(QtWidgets.QMainWindow):
         for system in self.systems.values():
             system.removeLocatedCharacter(char)
 
-        if system_name not in self.systems.keys():
-            if self.autoChangeRegion and evegate.getTokenOfChar(char):
-                try:
-                    for name, system_id in evegate.namesToIds([system_name]).items():
-                        if name.lower() == system_name.lower():
-                            system = evegate.getSolarSystemInformation(system_id)
-                            selected_system = evegate.getSolarSystemInformation(
-                                system["system_id"]
-                            )
-                            selected_constellation = (
-                                evegate.getConstellationInformation(
-                                    selected_system["constellation_id"]
-                                )
-                            )
-                            selected_region = selected_constellation["region_id"]
-                            selected_region_name = dotlan.convertRegionName(
-                                evegate.idsToNames([selected_region])[selected_region]
-                            )
-                            concurrent_region_name = Cache().getFromCache("region_name")
-                            if selected_region_name != concurrent_region_name:
-                                Cache().putIntoCache(
-                                    "region_name", selected_region_name
-                                )
-                                self.rescanIntel()
-                except Exception:
-                    pass
-
         if not system_name == "?" and system_name in self.systems.keys():
             self.systems[system_name].addLocatedCharacter(char)
             self.updateMapView()
 
     def updateMapView(self):
-        self.dotlan.setIncursionSystems(evegate.getIncursionSystemsIds())
-        self.dotlan.setCampaignsSystems(evegate.getCampaignsSystemsIds())
+        try:
+            self.dotlan.setIncursionSystems(evegate.getIncursionSystemsIds())
+            self.dotlan.setCampaignsSystems(evegate.getCampaignsSystemsIds())
+        except:
+            pass
 
         if self.currContent != self.dotlan.svg:
             self.mapTimer.stop()
@@ -1167,7 +1147,7 @@ class RegionChooser(QtWidgets.QDialog):
             ],
             parent=self,
         )
-        self.strList.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.strList.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
         self.regionNameField.setCompleter(self.strList)
         self.cancelButton.clicked.connect(self.accept)
         self.saveButton.clicked.connect(self.saveClicked)

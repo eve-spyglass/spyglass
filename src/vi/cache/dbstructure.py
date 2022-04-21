@@ -26,7 +26,7 @@ condition = if TRUE the query qull be executed
 databaseUpdates = []
 
 
-def updateDatabase(oldVersion, con):
+def updateDatabase(oldVersion, con) -> bool:
     """Changes for the database-structure should be added here,
     or added to added_database_updates
     con = the database connection
@@ -61,3 +61,5 @@ def updateDatabase(oldVersion, con):
         if update[1]:
             con.execute(update[0])
     con.commit()
+
+    return len(queries) > 0

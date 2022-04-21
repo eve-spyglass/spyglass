@@ -46,6 +46,9 @@ class Cache(object):
     # Cache-Instances in various threads: must handle concurrent writings
     SQLITE_WRITE_LOCK = threading.Lock()
 
+    # Dirty trick to know if we updated the DB this launch
+    WAS_UPDATED = False
+
     def __init__(self, pathToSQLiteFile="cache.sqlite3"):
         """pathToSQLiteFile=path to sqlite-file to save the cache. will be ignored if you set Cache.PATH_TO_CACHE
         before init
@@ -72,7 +75,7 @@ class Cache(object):
                 pass
             else:
                 raise e
-        updateDatabase(version, self.con)
+        self.WAS_UPDATED = updateDatabase(version, self.con)
 
     def putIntoCache(self, key, value, max_age=60 * 60 * 24 * 3):
         """Putting something in the cache maxAge is maximum age in seconds"""
